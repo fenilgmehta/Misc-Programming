@@ -18,8 +18,7 @@ using namespace std;
 //     2. determine the cycles in the graph
 //     3. improve speed of Kruskal's algorithm
 
-class DisjoinSetUnion{
-public:
+struct DisjoinSetUnion{
     vector<int> p, s; // p -> parent, s -> subset size
 
 
@@ -85,6 +84,27 @@ public:
         cout << "p = [ "; for(auto &i: p) cout << i << ", "; cout << "]" << endl;
         cout << "s = [ "; for(auto &i: s) cout << i << ", "; cout << "]" << endl;
     }
+};
+
+//##########################################################
+
+struct DisjoinSetUnion_Small{
+    vector<int> parent;
+    DisjoinSetUnion_Small(int vertices){
+        parent.resize(vertices);
+        iota(begin(parent), end(parent), 0);
+    }
+
+    int find_set(int v) { return ((parent[v]==parent[parent[v]]) ? (parent[v]) : (parent[v] = find_set(parent[v]))); }
+
+    bool union_sets(int v1, int v2) {
+        int a=find_set(v1), b=find_set(v2);
+        if(a==b) return false;
+        parent[a] = b;
+        return true;
+    }
+
+    bool is_same_set(const int v1, const int v2) { return find_set(v1)==find_set(v2);}
 };
 
 //####################################################################################################################
