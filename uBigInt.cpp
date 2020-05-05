@@ -22,6 +22,7 @@
  * REFER: https://github.com/python/cpython/blob/master/Include/longintrepr.h
  * REFER: https://github.com/python/cpython/blob/master/Include/longobject.h
  * REFER: https://github.com/python/cpython/blob/master/Objects/longobject.c
+ * REFER: https://github.com/sercantutar/infint/blob/master/InfInt.h
  *
  * NOTE: Methods which can be removed from uBigInt to reduce the size of code
  *       without breaking the code are:
