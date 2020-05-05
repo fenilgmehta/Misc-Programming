@@ -19,8 +19,9 @@ template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<
 #define matrix(T,name,rows,cols,val) vector<vector<T>> name((rows),vector<T>((cols),(val)));
 template<typename T> using min_heap = priority_queue<T, std::vector<T>, std::greater<T>>;
 template<typename T> using max_heap = priority_queue<T>;
-template<typename T, typename S> inline bool contains(map<T,S> map1, S value1) { return map1.find(value1) != map1.end(); }
-template<typename T, typename S> inline bool contains(T container1, S value1) { return container1.find(value1) != container1.end(); }
+template<typename T, typename S> inline bool contains(const map<T,S> &map1, const S &value1) { return map1.find(value1) != map1.end(); }
+template<typename T, typename S> inline bool contains(const T &container1, const S &value1) { return container1.find(value1) != container1.end(); }
+
 //------------------------------------------------
 
 void solve(){
