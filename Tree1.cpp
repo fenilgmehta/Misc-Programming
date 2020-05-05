@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdint>
-#include <array>
+#include <vector>
 #include <stdexcept>
 using namespace std;
 
@@ -9,83 +9,90 @@ using namespace std;
 //####################################################################################################################
 
 /* 
- * This class is used to store ANY TYPE of TREE in the form of array using 
+ * This struct is used to store ANY TYPE of TREE in the form of array using 
  * fixed amount of storage, without using vector or linked lists.
+ * 
+ * The tree is 0-Indexed, hence valid vertices are 0 <= v < vertex_count
+ * 
  */
 
 #define TREE1_CATCH_EXCEPTIONS
 
-template<size_t vertices_count>
-class Tree1{
-public:
-    int edges;
-    // Array are used as 1-indexed, hence 1 is added.
-    // 👇 stores head for each vertex
-    array<int, vertices_count+1> head;
-    // 👇 stores the linked list of edges in the array. format: pair<vertex number, link>
-    array<pair<int,int>, 2*vertices_count-1> connection_list;
-    // NOTE: size is `2*vertices_count-1` as for each edge, we have to make two entries
+struct Tree1{
+    struct TreeNode{
+        int vertex, link;
+        TreeNode(): vertex{-1}, link{-1} {}
+        TreeNode(int v, int l): vertex{v}, link{l} {}
+    };
+    vector<TreeNode> edge_list;  // stores the linked list of edges in the array.
+    vector<int> head;  // stores head for each vertex
+    int vertex_count, edges;
 
-    /* Vertex count starts from 1 to `vertices_count` */
-    Tree1(): edges{0}{
-        fill(begin(head), end(head), -1);
+    /* Vertex count starts from 0 to `vertex_count-1` */
+    Tree1(int t_vertex_count): vertex_count{t_vertex_count}, edges{0} {
+        head.resize(vertex_count, -1);
+        edge_list.resize(2*(vertex_count-1));  // NOTE: size is `2*(vertex_count-1)` as for each edge, we have to make two entries
     }
 
-    void connect(const int v1, const int v2) {
-    #ifdef TREE1_CATCH_EXCEPTIONS
-        if(v1==v2) throw invalid_argument("Tree can NOT have loops");
-        if(v1>vertices_count or v2>vertices_count) throw out_of_range("Vertex can have value in the range [1, "+to_string(vertices_count)+"]");
-        if((edges+1) >= vertices_count) throw out_of_range("Only `vertices_count-1` edges are allowed in a tree");
-        // WARNING: it is assumed that the user does NOT add edge between vertices which break properties of a tree
-    #endif
+    void add_edge(const int v1, const int v2) {
+        #ifdef TREE1_CATCH_EXCEPTIONS
+            if(v1==v2) throw invalid_argument("Tree can NOT have loops");
+            if(v1>=vertex_count or v2>=vertex_count) throw invalid_argument("Vertex can have value in the range [0, "+to_string(vertex_count)+")");
+            if((edges+1) >= vertex_count) throw invalid_argument("Only `vertex_count-1` edges are allowed in a tree");
+            // WARNING: it is assumed that the user does NOT add edge between vertices which break properties of a tree
+        #endif
         ++edges;
-        connection_list[edges*2-1].first = v2;
-        connection_list[edges*2-1].second = head[v1];  // update the link
-        connection_list[edges*2].first = v1;
-        connection_list[edges*2].second = head[v2];  // update the link
-        head[v1] = edges*2-1;  // update the head
-        head[v2] = edges*2;  // update the head
-    }
-
-    /* Countes the number of leaf nodes under the vertex `v1` 
-     * WARNING: it is assumed that the user will select `v1` such that 1 <= v1 <= vertices_count
-     */
-    int dfs(const int &v1, const int &parent=-1){
-        bool is_leaf = true;
-        int sum = 0;
-        for(int i = head[v1]; i != (-1); i = connection_list[i].second){
-            if(connection_list[i].first == parent) continue;
-            is_leaf = false;
-            sum += dfs(connection_list[i].first, v1);
-        }
-
-        // db(is_leaf); db(sum);
-        if(is_leaf) return 1;
-        return sum;
+        edge_list[edges*2-2] = {v2, head[v1]};  // update the link
+        edge_list[edges*2-1] = {v1, head[v2]};  // update the link
+        head[v1] = edges*2-2;  // update the head
+        head[v2] = edges*2-1;  // update the head
     }
 };
+
+//##########################################################
+
+/* Countes the number of leaf nodes under the vertex `v1` 
+ * WARNING: it is assumed that the user will select `v1` such that 0 <= v1 < vertex_count
+ */
+int dfs(const Tree1 &tree, const int &v1, const int &parent=-1){
+    bool is_leaf = true;
+    int sum = 0;
+    for(int i = tree.head[v1]; i != (-1); i = tree.edge_list[i].link){
+        // cout << "i="<<i<<endl;
+        if(tree.edge_list[i].vertex == parent) continue;
+        is_leaf = false;
+        // cout << "v1="<<tree.edge_list[i].vertex << endl;
+        sum += dfs(tree, tree.edge_list[i].vertex, v1);
+    }
+
+    if(is_leaf) return 1;
+    return sum;
+}
 
 //####################################################################################################################
 
 int main(){
-    Tree1<8> t;      /*    Assuming 1 as root   */
-    t.connect(2,3);  /*           1             */
-    t.connect(4,1);  /*          /|\            */
-    t.connect(1,5);  /*         4 5 2           */    
-    t.connect(7,4);  /*        /    |\          */
-    t.connect(8,2);  /*       7     8 3         */
-    t.connect(2,1);  /*                \        */
-    t.connect(3,6);  /*                 6       */
-    cout << boolalpha << "t.dfs(1) = " << (t.dfs(1)==4) << endl;  // perform DFS assuming 1 as root
-    cout << boolalpha << "t.dfs(4) = " << (t.dfs(4)==4) << endl;  // perform DFS assuming 4 as root
-    cout << boolalpha << "t.dfs(7) = " << (t.dfs(7)==3) << endl;  // perform DFS assuming 7 as root
-    cout << boolalpha << "t.dfs(5) = " << (t.dfs(5)==3) << endl;  // perform DFS assuming 5 as root
-    cout << boolalpha << "t.dfs(2) = " << (t.dfs(2)==4) << endl;  // perform DFS assuming 2 as root
-    cout << boolalpha << "t.dfs(3) = " << (t.dfs(3)==4) << endl;  // perform DFS assuming 3 as root
+    Tree1 t(9);      /*    Assuming 1 as root      */
+    t.add_edge(2,3);  /*                 1          */
+    t.add_edge(4,1);  /*        0       /|\         */
+    t.add_edge(1,5);  /*               4 5 2        */    
+    t.add_edge(7,4);  /*              /    |\       */
+    t.add_edge(8,2);  /*             7     8 3      */
+    t.add_edge(2,1);  /*                      \     */
+    t.add_edge(3,6);  /*                       6    */
+    cout << "Head = "; for(auto &i: t.head) cout << i << ", "; cout << endl;
+    cout << "Adj = "; for(auto &i: t.edge_list) cout << "(" << i.vertex << "," << i.link << ") "; cout << endl;
+    cout << boolalpha << "t.dfs(0) == 1 : " << (dfs(t, 0)==1) << endl;  // perform DFS assuming 0 as root
+    cout << boolalpha << "t.dfs(1) == 4 : " << (dfs(t, 1)==4) << endl;  // perform DFS assuming 1 as root
+    cout << boolalpha << "t.dfs(4) == 4 : " << (dfs(t, 4)==4) << endl;  // perform DFS assuming 4 as root
+    cout << boolalpha << "t.dfs(7) == 3 : " << (dfs(t, 7)==3) << endl;  // perform DFS assuming 7 as root
+    cout << boolalpha << "t.dfs(5) == 3 : " << (dfs(t, 5)==3) << endl;  // perform DFS assuming 5 as root
+    cout << boolalpha << "t.dfs(2) == 4 : " << (dfs(t, 2)==4) << endl;  // perform DFS assuming 2 as root
+    cout << boolalpha << "t.dfs(3) == 4 : " << (dfs(t, 3)==4) << endl;  // perform DFS assuming 3 as root
     
     try{
-        t.connect(123,122);
-    } catch (out_of_range e) {
+        t.add_edge(123,122);
+    } catch (invalid_argument e) {
         cout << "EXCEPTION: " << e.what() << endl;
     }
 
