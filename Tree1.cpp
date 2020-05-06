@@ -47,6 +47,16 @@ struct Tree1{
         head[v1] = edges*2-2;  // update the head
         head[v2] = edges*2-1;  // update the head
     }
+
+    struct Tree1Iter{
+        const Tree1 &t;
+        int i;
+        inline Tree1Iter(const Tree1 &t1, const int &vertex1): t(t1), i{t.head[vertex1]} { }
+        inline bool is_valid(){ return i!=(-1); }
+        inline void advance() { i = t.edge_list[i].link; }
+        inline const Tree1::TreeNode& operator*(){ return t.edge_list[i]; }
+    };
+    Tree1Iter begin(const int &vertex) const { return Tree1Iter(*this, vertex); }
 };
 
 //##########################################################
@@ -57,12 +67,11 @@ struct Tree1{
 int dfs(const Tree1 &tree, const int &v1, const int &parent=-1){
     bool is_leaf = true;
     int sum = 0;
-    for(int i = tree.head[v1]; i != (-1); i = tree.edge_list[i].link){
-        // cout << "i="<<i<<endl;
-        if(tree.edge_list[i].vertex == parent) continue;
+
+    for(Tree1::Tree1Iter i = tree.begin(v1); i.is_valid(); i.advance()){
+        if((*i).vertex == parent) continue;
         is_leaf = false;
-        // cout << "v1="<<tree.edge_list[i].vertex << endl;
-        sum += dfs(tree, tree.edge_list[i].vertex, v1);
+        sum += dfs(tree, (*i).vertex, v1);
     }
 
     if(is_leaf) return 1;
