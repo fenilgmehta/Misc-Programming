@@ -51,13 +51,19 @@ struct Tree1{
     struct Tree1Iter{
         const Tree1 &t;
         int i;
+
+        inline Tree1Iter(const Tree1 &t1): t{t1}, i{-1} {}
         inline Tree1Iter(const Tree1 &t1, const int &vertex1): t(t1), i{t.head[vertex1]} { }
-        inline bool is_valid(){ return i!=(-1); }
-        inline void advance() { i = t.edge_list[i].link; }
+        inline Tree1Iter& operator ++(){ i = t.edge_list[i].link; return *this; }
         inline const Tree1::TreeNode& operator*(){ return t.edge_list[i]; }
+        inline bool operator!=(const Tree1Iter &t1){ return (((&t)!=(&t1.t)) || (i!=t1.i)); }
+
+        inline Tree1Iter& begin() {return *this;}
+        inline Tree1Iter end() {return Tree1Iter(this->t);}
     };
-    Tree1Iter begin(const int &vertex) const { return Tree1Iter(*this, vertex); }
+    inline Tree1Iter edge_iterator(const int &vertex) const { return Tree1Iter(*this, vertex); }
 };
+
 
 //##########################################################
 
@@ -68,10 +74,10 @@ int dfs(const Tree1 &tree, const int &v1, const int &parent=-1){
     bool is_leaf = true;
     int sum = 0;
 
-    for(Tree1::Tree1Iter i = tree.begin(v1); i.is_valid(); i.advance()){
-        if((*i).vertex == parent) continue;
+    for(const Tree1::TreeNode &i: tree.edge_iterator(v1)){
+        if(i.vertex == parent) continue;
         is_leaf = false;
-        sum += dfs(tree, (*i).vertex, v1);
+        sum += dfs(tree, i.vertex, v1);
     }
 
     if(is_leaf) return 1;
