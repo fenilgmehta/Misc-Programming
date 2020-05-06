@@ -25,6 +25,21 @@ struct Graph{
         adj.emplace_back(v2, head[v1]);
         head[v1] = adj.size() - 1;
     }
+
+    struct GraphIter{
+        const Graph &t;
+        int i;
+
+        inline GraphIter(const Graph &t1): t{t1}, i{-1} {}
+        inline GraphIter(const Graph &t1, const int &vertex1): t(t1), i{t.head[vertex1]} { }
+        inline GraphIter& operator ++(){ i = t.adj[i].link; return *this; }
+        inline const Graph::GraphNode& operator*(){ return t.adj[i]; }
+        inline bool operator!=(const GraphIter &t1){ return (((&t)!=(&t1.t)) || (i!=t1.i)); }
+
+        inline GraphIter& begin() {return *this;}
+        inline GraphIter end() {return GraphIter(this->t);}
+    };
+    inline GraphIter edge_iterator(const int &vertex) const { return GraphIter(*this, vertex); }
 };
 
 //##########################################################
@@ -48,9 +63,8 @@ bool dfs(Graph g, int v1, DFSData &d, bool parity){
     d.parity[v1] = parity;
 
     bool success = true;
-    int j = g.head[v1];
-    for(;j != -1; j = g.adj[j].link){
-        success &= dfs(g, g.adj[j].vertex, d, !parity);
+    for(const Graph::GraphNode &i: g.edge_iterator(v1)){
+        success &= dfs(g, i.vertex, d, !parity);
     }
 
     return success;
