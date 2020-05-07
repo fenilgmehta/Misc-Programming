@@ -54,7 +54,7 @@ struct DFSData{
 };
 
 /* return success(true) or failure(false) of parity assignment for a Bipartite graph */
-bool dfs(Graph g, int v1, DFSData &d, bool parity){
+bool dfs(const Graph &g, int v1, DFSData &d, bool parity){
     if(d.visited[v1]) {
         if(d.parity[v1] != parity) return false;
         return true;
