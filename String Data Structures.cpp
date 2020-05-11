@@ -7,6 +7,17 @@ using namespace std;
 
 //####################################################################################################################
 
+/* 
+Tries:
+    https://www.geeksforgeeks.org/trie-insert-and-search/
+    https://www.geeksforgeeks.org/advantages-trie-data-structure/
+    https://www.geeksforgeeks.org/ternary-search-tree/
+
+*/
+
+// This is a Ternary Search Tree - special trie data structure where the
+// child nodes of a standard trie are ordered as a binary search tree.
+// A simpler implementation with slight modification: https://codeforces.com/contest/4/submission/79724848
 struct Trie{
     struct TernaryTree{
         char ch;
@@ -120,59 +131,38 @@ struct Trie{
     }
 };
 
+//####################################################################################################################
 
-// Used for Codeforces question: https://codeforces.com/problemset/problem/4/C
-// This implementation shows how many times a string is requested for insertion
-struct TrieSimple{
-    struct TernaryTree{
-        TernaryTree *left, *down, *right;
-        int count;
-        char ch;
-        TernaryTree(const char &t_ch, const int &t_count): ch{t_ch}, count{t_count}, \
-            left{nullptr}, down{nullptr}, right{nullptr} {}
-    };
-    TernaryTree root;
-    int words;
+/* 
 
-    TrieSimple(): root{'\0',-1}, words{0} {};
+https://www.youtube.com/watch?v=NinWEPPrkDQ&t=483s      (Strings: suffix tree, suffix array, linear-time construction for large alphabets, suffix tray, document retrieval)
+https://discuss.codechef.com/t/suffix-trees/2045        (Is there a tutorial for implementation and applications of suffix tree data-structure ?)
+https://discuss.codechef.com/t/suffix-array-and-suffix-tree/11081       (Can anyone tell me the simplest implementation of Sufix Tree and Suffix Array(nlogn^2).?)
+https://discuss.codechef.com/t/help-with-ukkonens-algorithm/47635       (Ukken’s algorithm for Suffix Tree construction)
 
-    ~TrieSimple(){
-        clear_memeory(root.down);
-    }
+Suffix Trie:
+    https://www.youtube.com/watch?v=qh2leThTv0Y         (Basic Idea - logical implementation)
+    https://www.codechef.com/problems/EST               (Practice Question)
+    https://discuss.codechef.com/t/est-editorial/394    (Editorial of the above Question) 
 
-    void clear_memeory(const TernaryTree *ptr){
-        if(ptr == nullptr) return;
-        clear_memeory(ptr->left);
-        clear_memeory(ptr->down);
-        clear_memeory(ptr->right);
-        delete ptr;
-    }
-    
-    int& insert(const char *str){
-        TernaryTree *ptr = &root;
-        for(; (*str) != '\0'; ++str){
-            if(ptr->down == nullptr){
-                ptr->down = new TernaryTree(*str, 0);
-                ptr = ptr->down;
-                continue;
-            }
+Suffix Tree:
+    https://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english?rq=1    (Explanation)
+    https://cp-algorithms.com/string/suffix-tree-ukkonen.html           (Explanation and Implementation)
+    https://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/suffixtrees.pdf    (PPT)
+    https://en.wikipedia.org/wiki/Suffix_tree                           (Explanation)
 
-            ptr = ptr->down;
-            while(ptr->ch != (*str)){
-                if(ptr->ch < (*str)){
-                    if(ptr->left == nullptr) ptr->left = new TernaryTree(*str, 0);
-                    ptr = ptr->left;
-                } else {  // (*str) < ptr->ch
-                    if(ptr->right == nullptr) ptr->right = new TernaryTree(*str, 0);
-                    ptr = ptr->right;
-                }
-            }
-        }
+Suffix Array:
+    https://web.stanford.edu/class/cs97si/suffix-array.pdf      (Best implementation/application tutorials for suffix array across Internet)
+    https://cp-algorithms.com/string/suffix-array.html          (Explanation and Implementation)
 
-        ++ptr->count;
-        return ptr->count;
-    }
-};
+Suffix Automaton
+    https://cp-algorithms.com/string/suffix-automaton.html      (Explanation and Implementation)
+
+Others:
+    https://gist.github.com/makagonov/f7ed8ce729da72621b321f0ab547debb  (Implementation - not checked)
+    https://ideone.com/4GxpU2                                           (Implementation - not checked)
+
+*/
 
 //####################################################################################################################
 
