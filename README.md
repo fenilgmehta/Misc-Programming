@@ -2,13 +2,23 @@
 This repository contains all sorts of programs.
 
 
+## Good references
+- [https://github.com/indy256/codelibrary/](https://github.com/indy256/codelibrary/)
+- [How to start Competitive Programming?](https://youtu.be/xAeiXy8-9Y8)
+- [How To Become Red Coder? (codeforces.com)](https://youtu.be/y7169jEvb-Y)
+- [Don't Make These Mistakes (1st and 2nd Year)](https://youtu.be/-_gRnYmWkCE)
+- [How do competitive programmers become so good at problem solving skills ? What is their approach in solving a high level programming question ?](https://www.quora.com/How-do-competitive-programmers-become-so-good-at-problem-solving-skills-what-is-their-approach-in-solving-a-high-level-programming-question)
+- [How smart are red coders ?](https://www.quora.com/How-smart-are-the-red-coders-on-TopCoder)
+- [How should one win the ACM ICPC? What efforts should I put forth starting from my 1st year of engineering (IT) ?](https://www.quora.com/How-should-one-win-the-ACM-ICPC-What-efforts-should-I-put-forth-starting-from-my-1st-year-of-engineering-IT/answer/Ana-Echavarria)
+
+
 ## Tree
 1. [Tree1.cpp](Tree1.cpp)
 
 
 ## Graph
 1. [Graph1.cpp](Graph1.cpp)
-2. [https://cp-algorithms.com/graph/01_bfs.html](https://cp-algorithms.com/graph/01_bfs.html)
+2. [https://cp\-algorithms.com/graph/01\_bfs.html](https://cp-algorithms.com/graph/01_bfs.html)
 
 
 ## Useful Data Structures and Programs
@@ -17,7 +27,7 @@ This repository contains all sorts of programs.
 3. [uBigInt.cpp](uBigInt.cpp) - infinite size unsigned integers
 4. [Matrix2d.cpp](Matrix2d.cpp) - 2 dimetional array
 5. [Disjoint Set Union (Union Find).cpp](Disjoint%20Set%20Union%20(Union%20Find).cpp)
-6. [Trie.cpp](Trie.cpp)
+6. [String Data Structures.cpp](String%20Data%20Structures.cpp)
 
 
 ## Links to read
