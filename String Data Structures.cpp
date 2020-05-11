@@ -25,6 +25,38 @@ struct Trie{
         TernaryTree *left, *right, *down;
         TernaryTree(const char t_ch, const bool t_is_word): ch{t_ch}, is_end_of_word{t_is_word}, \
             left{nullptr}, right{nullptr}, down{nullptr} {}
+
+        pair<bool, TernaryTree*> find(const char &ch, const bool &add_if_absent, const bool &return_added_node) {
+            TernaryTree *ptr = this;
+            int flag = 0;
+            while(ch != this->ch){
+                if(ch < this->ch){
+                    if(ptr->left == nullptr) { flag=1; break; }
+                    ptr = ptr->left;
+                } else {
+                    if(ptr->right == nullptr) { flag=2; break; }
+                    ptr = ptr->right;
+                }
+            }
+            if(flag != 0 && add_if_absent) {
+                if(flag==1) ptr->left = new TernaryTree(ch, false);
+                else ptr->right = new TernaryTree(ch, false);
+                if(return_added_node==true)
+                    ptr = (flag==1) ? (ptr->left) : (ptr->right);
+            }
+            return {flag==0, ptr};
+        }
+
+        // reference to pointer is passed to avoid memory overhead
+        static void clear_memeory(TernaryTree *&ptr){
+            if(ptr == nullptr) return;
+            // cout << ptr->ch << " . -> " << (&ptr) << endl;
+            // if(ptr->left != nullptr) cout << ptr->ch << " l -> " << (&(ptr->left)) << endl;
+            clear_memeory(ptr->left);
+            clear_memeory(ptr->down);
+            clear_memeory(ptr->right);
+            delete ptr;
+        }
     };
 
     TernaryTree root;
@@ -33,15 +65,7 @@ struct Trie{
     Trie(): root('\0', false), words{0} {}
 
     ~Trie(){
-        clear_memeory(root.down);
-    }
-
-    void clear_memeory(const TernaryTree *ptr){
-        if(ptr == nullptr) return;
-        clear_memeory(ptr->left);
-        clear_memeory(ptr->down);
-        clear_memeory(ptr->right);
-        delete ptr;
+        TernaryTree::clear_memeory(root.down);
     }
 
     /* Returns: true if `str` is present in the Trie, else false */
@@ -50,16 +74,9 @@ struct Trie{
         for(; *str != '\0'; ++str){
             if(ptr->down == nullptr) return false;
 
-            ptr = ptr->down;
-            while((*str) != ptr->ch){
-                if((*str) < ptr->ch){
-                    if(ptr->left == nullptr) return false;
-                    ptr = ptr->left;
-                } else {
-                    if(ptr->right == nullptr) return false;
-                    ptr = ptr->right;
-                }
-            }
+            pair<bool, Trie::TernaryTree*> res = ptr->down->find(*str, false, false);
+            if(res.first == false) return false;
+            ptr = res.second;
         }
         return ptr->is_end_of_word;
     }
@@ -74,16 +91,8 @@ struct Trie{
                 continue;
             }
 
-            ptr = ptr->down;
-            while((*str) != ptr->ch){
-                if((*str) < ptr->ch){
-                    if(ptr->left == nullptr) ptr->left = new TernaryTree(*str, false);
-                    ptr = ptr->left;
-                } else {
-                    if(ptr->right == nullptr) ptr->right = new TernaryTree(*str, false);
-                    ptr = ptr->right;
-                }
-            }
+            pair<bool, Trie::TernaryTree*> res = ptr->down->find(*str, true, true);
+            ptr = res.second;
         }
         if(ptr->is_end_of_word) return false; // str is already present in the Trie. Hence not inserted
         ++words;
