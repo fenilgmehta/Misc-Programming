@@ -1,9 +1,9 @@
 #include <bits/stdc++.h> // This is all in one include library
 using namespace std;
 //------------------------------------------------
-#define db(a) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<#a<<"\033[1;31m"<<" : "<<"\033[0m"<<a<<'\n';}
+#define db(a) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<#a<<"\033[1;31m"<<" : "<<"\033[0m"<<a<<'\n'; cout.flush(); cerr.flush();}
 #define dbiter(...) dbgIter(#__VA_ARGS__, __VA_ARGS__)
-template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n";}
+template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n"; cout.flush(); cerr.flush();}
 #define endl '\n'  // WARNING: REMOVE this is working on interactive programs
 #define urange(_i, _startLimit, _endLimit) for(int64_t (_i) = (_startLimit); (_i) < (_endLimit); ++(_i))
 #define ulimit(_i, _startLimit, _endLimit) for(int64_t (_i) = (_startLimit); (_i) <= (_endLimit); ++(_i))
@@ -12,6 +12,7 @@ template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<
 #define uiter(arr_name, iter_start, iter_end) next(begin(arr_name),iter_start),next(begin(arr_name),iter_end)
 #define dall(arr_name) rbegin(arr_name),rend(arr_name)
 #define diter(arr_name, iter_start, iter_end) make_reverse_iterator(next(begin(arr_name),iter_end)),make_reverse_iterator(next(begin(arr_name),iter_start))
+#define gett(_tup, _n) get<_n>(_tup)
 #define short int16_t
 #define int int32_t
 #define long int64_t     // WARNING: REMOVE this when using `long double`
@@ -33,7 +34,8 @@ int main() {
     cin.tie(nullptr); cout.tie(nullptr);
     cout.precision(20); cout << fixed;
 
-    int T; cin>>T;
+    int T = 1;
+    cin>>T;
     while (T--)
         solve();
 

@@ -12,13 +12,13 @@ template <typename Arg, typename... Args> inline void input(Arg& arg, Args&... a
     #define printFunction(outStream, functionName, argDelimiter, lineDelimiter) template <typename Arg, typename... Args> inline void functionName(Arg&& arg, Args&&... args) { outStream << arg; (void)(int[]){0, (void(outStream << argDelimiter << args),0)...}; outStream << lineDelimiter; }
     printFunction(cerr, printErr, " "<<"\033[1;41m"<<","<<"\033[0m"<<" ", '\n');
     #define db(...) dbg(#__VA_ARGS__, __VA_ARGS__)
-    template<class T, class... U> void dbg(const char *sdbg, T h, U... a) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<" "<<"\033[1;41m"<<"="<<"\033[0m"<<" "; printErr(h, a...);}
+    template<class T, class... U> void dbg(const char *sdbg, T h, U... a) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<" "<<"\033[1;41m"<<"="<<"\033[0m"<<" "; printErr(h, a...); cout.flush(); cerr.flush();}
     template <class S, class T>ostream& operator <<(ostream& os, const pair<S, T>& p) {return os << "pair(" << p.first << "\033[1;31m" << ", " << "\033[0m" << p.second << ")";}
     template <class T>ostream& operator <<(ostream& os, const vector<T>& p) {os << "\033[1;32m" << "vector[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
     template <class T>ostream& operator <<(ostream& os, const set<T>& p) {os << "\033[1;32m" << "set[ "; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
     template <class S, class T>ostream& operator <<(ostream& os, const map<S, T>& p) {os << "\033[1;32m" << "map[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
     #define dbiter(...) dbgIter(#__VA_ARGS__, __VA_ARGS__)
-    template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n";}
+    template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n"; cout.flush(); cerr.flush();}
 #else
     #define db(...) ;
     #define dbiter(...) ;
@@ -50,6 +50,7 @@ template<typename T> using min_heap = priority_queue<T, std::vector<T>, std::gre
 template<typename T> using max_heap = priority_queue<T>;
 // USE: matrix(int, dp, 20+5, 20000+5, -1);
 
+#define gett(_tup, _n) get<_n>(_tup)
 template<typename T, typename S> inline bool contains(const map<T,S> &map1, const S &value1) { return map1.find(value1) != map1.end(); }
 template<typename T, typename S> inline bool contains(const T &container1, const S &value1) { return container1.find(value1) != container1.end(); }
 
@@ -66,7 +67,8 @@ int main() {
     cin.tie(nullptr); cout.tie(nullptr);
     cout.precision(20); cout << fixed;
 
-    int T; cin>>T;
+    int T = 1;
+    cin>>T;
     while (T--)
         solve();
 
