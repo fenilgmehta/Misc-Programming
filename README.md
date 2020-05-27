@@ -30,29 +30,29 @@ This repository contains various types of programs.
 
 
 ## Tree
-1. [Tree1.cpp](Tree1.cpp)
+1. [Tree1.cpp](./src/Tree1.cpp)
     [ ] Depth First Search (DFS)
 2. [Types of trees in data structures](https://www.quora.com/What-are-the-types-of-trees-in-data-structures)
 
 
 ## Graph
-1. [Graph1.cpp](Graph1.cpp)
+1. [Graph1.cpp](./src/Graph1.cpp)
     * [ ] Depth First Search (DFS)
     * [ ] Dijkstra's shortest path
 2. [https://cp\-algorithms.com/graph/01\_bfs.html](https://cp-algorithms.com/graph/01_bfs.html)
 
 
 ## Useful Data Structures and Programs
-1. [Competitive Programming Template (Big).cpp](Competitive%20Programming%20Template%20(Big).cpp)
-2. [Competitive Prog-ramming Template (Small).cpp](Competitive%20Programming%20Template%20(Small).cpp)
-3. [uBigInt.cpp](uBigInt.cpp) - infinite size unsigned integers
-4. [Matrix2d.cpp](Matrix2d.cpp) - 2 dimetional array
-5. [Disjoint Set Union (Union Find).cpp](Disjoint%20Set%20Union%20(Union%20Find).cpp)
-6. [String Data Structures.cpp](String%20Data%20Structures.cpp)
+1. [Competitive Programming Template (Big).cpp](./src/Competitive%20Programming%20Template%20(Big).cpp)
+2. [Competitive Prog-ramming Template (Small).cpp](./src/Competitive%20Programming%20Template%20(Small).cpp)
+3. [uBigInt.cpp](./src/uBigInt.cpp) - infinite size unsigned integers
+4. [Matrix2d.cpp](./src/Matrix2d.cpp) - 2 dimetional array
+5. [Disjoint Set Union (Union Find).cpp](./src/Disjoint%20Set%20Union%20(Union%20Find).cpp)
+6. [String Data Structures.cpp](./src/String%20Data%20Structures.cpp)
     * [ ] Trie (Ternary Search Tree - space optimized Trie)
     * [ ] Suffix Tree
     * [ ] Suffix Array
-
+7. [Prime Numbers.cpp](./src/Prime%20Numbers.cpp)
 
 ## Links to read
 1. [Blowing up unordered_map](https://codeforces.com/blog/entry/62393)
