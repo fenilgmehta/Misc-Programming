@@ -31,7 +31,7 @@ This repository contains various types of programs.
 
 ## Tree
 1. [Tree1.cpp](./src/Tree1.cpp)
-    [ ] Depth First Search (DFS)
+    * [ ] Depth First Search (DFS)
 2. [Types of trees in data structures](https://www.quora.com/What-are-the-types-of-trees-in-data-structures)
 
 
