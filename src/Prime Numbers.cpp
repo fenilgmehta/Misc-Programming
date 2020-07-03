@@ -7,8 +7,9 @@ using namespace std;
 
 /* 
 
-Performance Benchmarks for 0 <= i <= 100'000'000 (i.e. 1e8) when
-compiled using `g++ -O2 "Prime Numbers.cpp"` on Intel i5-5200U
+➜ Performance Benchmarks for 0 <= i <= 100'000'000 (i.e. 1e8) when
+  compiled using `g++ -O2 "Prime Numbers.cpp"` on Intel i5-5200U
+➜ Bash command: `command time ./a.out`
 
 •    SieveOfEratosthenes   ->   0.817 s (and ~11.9 MB of RAM)
 •  dp_prime_factors[i]==i  ->   1.737 s (and ~381.6 MB of RAM)
