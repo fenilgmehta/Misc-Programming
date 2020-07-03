@@ -324,9 +324,11 @@ TODO: Prim's  Algorhtm
 • Dijkstra’s algorithm is efficient, because it only processes each edge in the graph
   once, using the fact that there are NO NEGATIVE EDGES. However, if the graph has a
   negative edge, the algorithm may give incorrect results.
+• The only difference between the two is that Bellman-Ford is also capable of handling
+  negative weights whereas Dijkstra Algorithm can only handle positives.
 • Note that the distance to a node never changes after processing the node.
 • TIME COMPLEXITY = O(n + m log m)    <-----    n vertices, m edges
-• FASTER than Bellman-Ford algorithm
+• FASTER than Bellman-Ford algorithm when there are NO cycles and -ve edge weights
 • TESTED & WORKING perfectly for all testcases of https://cses.fi/problemset/task/1671/
 
 TODO verify this
@@ -366,6 +368,7 @@ vector<long> dijkstras(const GraphVectorWeighted &g, const int &source/* , const
 }
 
 /* 
+• REFER: https://cp-algorithms.com/graph/bellman_ford.html
 • REFER: https://www.geeksforgeeks.org/bellman-ford-algorithm-dp-23/
 • The Bellman–Ford algorithm finds shortest paths from a starting node to all nodes
   of the graph. The algorithm can process all kinds of graphs, provided that the graph
@@ -401,6 +404,7 @@ struct BellmanFordData{
     }
 };
 
+// 𝗡𝗢𝗧𝗘: this is a mixture of BellmanFord and SFPA because we are using queue to only work on relaxed vertices
 BellmanFordData bellman_ford(const GraphVectorWeighted &g, const int &source){
     BellmanFordData bfdata(g.vertices);
     queue<int> q_to_process, q_next;
@@ -607,7 +611,7 @@ int main(){
     }
     cout << "\n\n";
 
-    cout << "Dijkstra shortest path cost (0--->3) = " << dijkstras(g2, 0, 3);
+    cout << "Dijkstra shortest path cost (0--->3) = " << dijkstras(g2, 0/* , 3 */)[3];
 
     cout << "\n\n";
     return 0;
