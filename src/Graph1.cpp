@@ -112,6 +112,33 @@ bool dfs(const Graph &g, int v1, DFSData &d, bool parity){
 
 //##########################################################
 
+/* 
+• the TIME COMPLEXITY of breadth-first search(BFS) is O(n + m),
+  where n is the number of nodes and m is the number of edges.
+• Can be used to find the SSSP (single-source shortest path)
+  if the graph is unweighted. Use 0-1 BFS if the graph is weighted
+  all weights are either 0 or 1
+*/
+void bfs(const Graph &g, int v1){
+    vector<bool> visited(g.vertices);
+    vector<int> dist(g.vertices);
+    dist[v1] = 0;
+    queue<int> q;
+    q.push(v1);
+    while(not q.empty()){
+        int node = q.front();
+        q.pop();
+        visited[node] = true;
+        for(const auto &i: g.edge_iterator(node)){
+            if(visited[i.vertex] == true) continue;
+            q.push(i.vertex);
+            dist[i.vertex] = dist[node] + 1;
+        }
+    }
+}
+
+//##########################################################
+
 // Application of Depth First Search (DFS)
 
 struct BipartiteGraphData{
@@ -217,34 +244,13 @@ vector<int> find_cycle(const CycleData &cd){
     return cycle_arr;
 }
 
-//##########################################################
 
-/* 
-• the TIME COMPLEXITY of breadth-first search(BFS) is O(n + m),
-  where n is the number of nodes and m is the number of edges.
-• Can be used to find the SSSP (single-source shortest path)
-  if the graph is unweighted. Use 0-1 BFS if the graph is weighted
-  all weights are either 0 or 1
-*/
-void bfs(const Graph &g, int v1){
-    vector<bool> visited(g.vertices);
-    vector<int> dist(g.vertices);
-    dist[v1] = 0;
-    queue<int> q;
-    q.push(v1);
-    while(not q.empty()){
-        int node = q.front();
-        q.pop();
-        visited[node] = true;
-        for(const auto &i: g.edge_iterator(node)){
-            if(visited[i.vertex] == true) continue;
-            q.push(i.vertex);
-            dist[i.vertex] = dist[node] + 1;
-        }
-    }
-}
 
 //####################################################################################################################
+//####################################################################################################################
+//####################################################################################################################
+
+
 
 /* 
 • Directed Weighted Graph
