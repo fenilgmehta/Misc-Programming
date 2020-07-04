@@ -48,6 +48,10 @@ struct BinaryIndexTree{
         }
     }
 
+    inline size_type size() const { return n; }
+    inline void resize(const size_type &t_n, const T &t_default_value=0) { n = t_n; bit.resize(t_n+1, t_default_value); }
+    inline void reset(const T &t_default_value=0) { fill(begin(bit), end(bit), t_default_value); }
+
     void update(size_type idx, const T &diff){
         if(idx <= 0) { cerr << "-ve idx not allowed in BinaryIndexTree::update(...)\n"; return; }
         for(; idx <= n; move_to_parent(idx)) bit[idx] = combine(bit[idx], diff);
@@ -64,10 +68,6 @@ struct BinaryIndexTree{
     T query(const size_type &idx_first, const size_type &idx_last) const {
         return split(query(idx_last), query(idx_first-1));
     }
-
-    inline size_type size() const { return n; }
-    inline void resize(const size_type &t_n, const T &t_default_value=0) { n = t_n; bit.resize(t_n+1, t_default_value); }
-    inline void reset(const T &t_default_value=0) { fill(begin(bit), end(bit), t_default_value); }
 
     /* Returns base array value at index `idx`. The array is 1-indexed with range [1, n] */
     T operator[](size_type idx) const {
