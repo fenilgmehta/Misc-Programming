@@ -30,7 +30,7 @@ struct Matrix2d{
     };
 
     T *arr;
-    long arr_size, d1, d2;
+    uint64_t arr_size, d1, d2;
 
     explicit Matrix2d(const size_t &t_d1, const size_t &t_d2=1): arr_size{t_d1 * t_d2}, d1{t_d1}, d2{t_d2} { arr = new int[arr_size]; }
 
