@@ -35,13 +35,13 @@ struct BinaryIndexTree{
     CombinerFunction combine;
     SplitterFunction split;
 
-    explicit BinaryIndexTree(const size_type &t_n, const T &t_default_value=0): combine(), split(){
+    explicit BinaryIndexTree(const size_type t_n=0, const T &t_default_value=T()): combine(), split(){
         this->resize(t_n, t_default_value);
     }
     
     // TODO: can optimize this to O(n) time complexity
     template<typename RandomIt>
-    explicit BinaryIndexTree(RandomIt first, const RandomIt &last, const T &t_default_value=0): combine(), split(){
+    explicit BinaryIndexTree(RandomIt first, const RandomIt last, const T &t_default_value=0): combine(), split(){
         this->resize(distance(first, last), t_default_value);
         for(size_type idx = 1; first != last; ++idx, ++first){
             update(idx, *first);
@@ -49,23 +49,23 @@ struct BinaryIndexTree{
     }
 
     inline size_type size() const { return n; }
-    inline void resize(const size_type &t_n, const T &t_default_value=0) { n = t_n; bit.resize(t_n+1, t_default_value); }
-    inline void reset(const T &t_default_value=0) { fill(begin(bit), end(bit), t_default_value); }
+    inline void resize(const size_type t_n, const T &t_default_value=T()) { n = t_n; bit.resize(t_n+1, t_default_value); }
+    inline void reset(const T &t_default_value=T()) { fill(begin(bit), end(bit), t_default_value); }
 
     void update(size_type idx, const T &diff){
         if(idx <= 0) { cerr << "-ve idx not allowed in BinaryIndexTree::update(...)\n"; return; }
-        for(; idx <= n; move_to_parent(idx)) bit[idx] = combine(bit[idx], diff);
+        for(; idx <= n; idx = parent(idx)) bit[idx] = combine(bit[idx], diff);
     }
 
     /* Returns the Prefix Sum for the range [1, idx] */
     T query(size_type idx) const {
-        T res = 0;
-        for(; idx > 0; move_left(idx)) res = combine(res, bit[idx]);
+        T res = T();
+        for(; idx > 0; idx = left(idx)) res = combine(res, bit[idx]);
         return res;
     }
 
     /* Returns the Prefix Sum for the range [idx_first, idx_last] */
-    T query(const size_type &idx_first, const size_type &idx_last) const {
+    T query(const size_type idx_first, const size_type idx_last) const {
         return split(query(idx_last), query(idx_first-1));
     }
 
@@ -73,8 +73,8 @@ struct BinaryIndexTree{
     T operator[](size_type idx) const {
         if(idx <= 0) return T();
         T res = bit[idx];
-        const size_type left_sibling_idx = idx - (idx & -idx);
-        for(--idx; idx != left_sibling_idx; move_left(idx))
+        const size_type left_sibling_idx = idx - LSB(idx);
+        for(--idx; idx != left_sibling_idx; idx = left(idx))
             res = split(res, bit[idx]);
         return res;  // res = split(bit[idx], bit[children of idx])
     }
@@ -82,19 +82,21 @@ struct BinaryIndexTree{
     // • -idx is 2's complement where the first bit storing 1 from the
     //   RHS remains the same and everything to its LHS get toggled
     //   i.e. `10101 𝟏𝟎𝟎𝟎`  ---> `01010 𝟏𝟎𝟎𝟎`
-    
     // • `idx&-idx` for `10101 𝟏𝟎𝟎𝟎` gives `00000 𝟏𝟎𝟎𝟎`
     template<typename Index>
-    inline static void move_to_parent(Index &idx) { idx += (idx & -idx); }
+    inline static Index LSB(const Index idx) { return idx & (-idx); }
 
     template<typename Index>
-    inline static void move_left(Index &idx) { idx ^= (idx & -idx); }  // idx -= (idx & -idx) is also correct
+    inline static Index parent(const Index idx) { return idx + LSB(idx); }
 
     template<typename Index>
-    inline static void move_to_right_sibling(Index &idx) { idx |= (idx & -idx) >> 1; }
+    inline static Index left(const Index idx) { return idx ^ LSB(idx); }  // idx - LSB(idx) is also correct
 
     template<typename Index>
-    inline static void move_to_first_child(Index &idx) { idx -= (idx & -idx) >> 1; }
+    inline static Index right_sibling(const Index idx) { return idx | (LSB(idx) >> 1); }
+
+    template<typename Index>
+    inline static Index first_child(const Index idx) { return idx - (LSB(idx) >> 1); }
 };
 
 /* Only useful when BinaryIndexTree store prefix sum
@@ -110,23 +112,106 @@ auto find(const BinaryIndexTree<T> &bit, T prefixSumFreq){
         const T &qVal = bit.bit[idx];
         if(prefixSumFreq == qVal) {
             result_idx = idx;  // this is done to ensure that the first occurence of prefixSumFreq is returned instead of any random
-            bit.move_to_first_child(idx);
+            idx = bit.first_child(idx);
             continue;
         }
 
         prefixSumFreq -= qVal;
         if(prefixSumFreq > 0){
-            bit.move_to_right_sibling(idx);
-            while(idx > bit.size()) bit.move_to_first_child(idx);
+            idx = bit.right_sibling(idx);
+            while(idx > bit.size()) idx = bit.first_child(idx);
         } else {
             prefixSumFreq += qVal;
-            bit.move_to_first_child(idx);
+            idx = bit.first_child(idx);
         }
     }
 
     if(prefixSumFreq == bit.bit[idx]) return idx;
     return result_idx;
 }
+
+//####################################################################################################################
+
+template<typename T>
+struct Matrix{
+    size_t rows, cols, n;
+    vector<T> arr;
+
+    Matrix(size_t t_rows, size_t t_cols, T default_value = T()):
+        rows{t_rows}, cols{t_cols}, n{rows*cols}, arr(n, default_value) {}
+
+    void resize(size_t t_rows, size_t t_cols, T default_value = T()) {
+        rows=t_rows, cols=t_cols;
+        n=rows*cols;
+        arr.resize(n, default_value);
+    }
+
+    void reset(T default_value=T()) { fill(arr.begin(), arr.end(), default_value); }
+
+    inline T& at(size_t x, size_t y) { return arr.at(x*cols + y); }
+    inline T& at1(size_t x, size_t y) { return arr.at((x-1)*cols + (y-1)); }
+};
+
+// REFER: https://iq.opengenus.org/2d-fenwick-tree/
+// REFER: https://codeforces.com/blog/entry/56590
+// REFER: https://www.youtube.com/watch?v=kKlZ9B3cS14
+// REFER: https://www.topcoder.com/community/competitive-programming/tutorials/binary-indexed-trees/#2d
+
+/* 
+ * NOTE: All parameters are 1-indexed
+ * Each column of the 2D Matrix is stored at each node of the BIT Tree 
+ * */
+template<typename T, typename CombinerFunction = plus<T>, typename SplitterFunction = minus<T>>
+struct BinaryIndexTree2d{
+    Matrix<T> bit;
+    CombinerFunction combine;
+    SplitterFunction split;
+    BinaryIndexTree2d(size_t t_rows, size_t t_cols, const T& default_value = T()):
+        bit(t_rows, t_cols, default_value), combine(), split() {}
+
+    void resize(size_t t_rows, size_t t_cols, const T& default_value = T()) {
+        bit.resize(t_rows, t_cols, default_value);
+    }
+
+    inline T& at(size_t x, size_t y) { return bit.at1(x,y); }
+
+    // REFER: https://cses.fi/problemset/hack/1739/entry/168243/
+    void build(){
+        for(size_t i = 1; i < bit.rows; ++i){
+            for(size_t j = 1; j < bit.cols; ++j){
+                const size_t x = i + LSB(i);  // gives parent of column
+                if (x <= bit.rows) bit.at1(x,j) = combine(bit.at1(i,j), bit.at1(x,j));
+                const size_t y = j + LSB(j);  // gives parent in column
+                if (y <= bit.cols) bit.at1(i,y) = combine(bit.at1(i,j), bit.at1(i,y));
+
+                if (x <= bit.rows && y <= bit.cols) bit.at1(x,y) = split(bit.at1(x,y), bit.at1(i,j));
+            }
+        }
+    }
+
+    void update(size_t x, size_t y, const T& diff) {
+        for(auto i = x; i <= bit.rows; i+=LSB(i))
+            for(auto j = y; j <= bit.cols; j+=LSB(j))
+                bit.at1(i, j) += diff;
+    }
+
+    T query(int x, int y){
+        T res = 0;
+        for(auto i = x; i > 0; i^=LSB(i))
+            for(auto j = y; j > 0; j^=LSB(j))
+                res = combine(res, bit.at1(i,j));
+        return res;
+    }
+
+    T query(int x1, int y1, int x2, int y2){
+        return split(combine(query(x2,y2), query(x1-1,y1-1)), combine(query(x2,y1-1), query(x1-1,y2)));
+    }
+
+    template<typename Index>
+    inline static Index LSB(const Index idx) { return idx & (-idx); }
+};
+
+// BinaryIndexTree2d<int, plus<int>, minus<int>> bit2d(1001, 1001, 0);
 
 //####################################################################################################################
 
