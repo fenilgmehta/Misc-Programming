@@ -49,13 +49,13 @@ struct Graph{
     vector<int> head;
     const int vertices;
 
-    inline Graph(const int &t_vertices, const int &t_edges=-1): vertices{t_vertices} {
+    inline Graph(const int t_vertices, const int t_edges=-1): vertices{t_vertices} {
         head.resize(t_vertices, -1);
         adj.reserve((0 <= t_edges) ? t_edges : t_vertices);
     }
 
     /* Adds an edge v1 ---> v2 . Call the function `add_edge(v2, v1)` to make the graph undirected */
-    inline void add_edge(const int &v1, const int &v2){
+    inline void add_edge(const int v1, const int v2){
         adj.emplace_back(v2, head[v1]);
         head[v1] = adj.size() - 1;
     }
@@ -65,7 +65,7 @@ struct Graph{
         int i;
 
         inline GraphIter(const Graph &t1): t{t1}, i{-1} {}
-        inline GraphIter(const Graph &t1, const int &vertex1): t(t1), i{t.head[vertex1]} { }
+        inline GraphIter(const Graph &t1, const int vertex1): t(t1), i{t.head[vertex1]} { }
         inline GraphIter& operator ++(){ i = t.adj[i].link; return *this; }
         inline const Graph::GraphNode& operator*(){ return t.adj[i]; }
         inline bool operator!=(const GraphIter &t1){ return i != t1.i; }  // (((&t)==(&t1.t)) && (i!=t1.i))
@@ -74,7 +74,7 @@ struct Graph{
         inline GraphIter end() {return GraphIter(this->t);}
     };
     // NOTE: highly suggested to be used in range based for loops only
-    inline GraphIter edge_iterator(const int &vertex) const { return GraphIter(*this, vertex); }
+    inline GraphIter edge_iterator(const int vertex) const { return GraphIter(*this, vertex); }
 };
 
 //##########################################################
@@ -144,13 +144,13 @@ void bfs(const Graph &g, int v1){
 struct BipartiteGraphData{
     vector<bool> visited;
     vector<bool> color;
-    BipartiteGraphData(const int &vertices){
+    BipartiteGraphData(const int vertices){
         visited.resize(vertices, false);
         color.resize(vertices, false);
     }
 };
 
-bool bipartite_graph_color(const Graph &g, BipartiteGraphData &bgd, const int &v, const bool &color){
+bool bipartite_graph_color(const Graph &g, BipartiteGraphData &bgd, const int v, const bool color){
     if(bgd.visited[v]) {
         if(bgd.color[v] != color) return false;
         return true;
@@ -169,7 +169,7 @@ bool bipartite_graph_color(const Graph &g, BipartiteGraphData &bgd, const int &v
 
 /* Returns a pair<BipartiteGraphData, success/failure of bipartite graph coloring>,
         where success == `true` or failure == `false` for color assignment of the graph */
-pair<BipartiteGraphData, bool> bipartite_graph_split(const Graph &g, const int &v_low, const int &v_high) {
+pair<BipartiteGraphData, bool> bipartite_graph_split(const Graph &g, const int v_low, const int v_high) {
     BipartiteGraphData bgd(g.vertices);
     bool is_possible = true;
     for(int i = v_low; i <= v_high; ++i)
@@ -188,7 +188,7 @@ struct CycleData{
     vector<int> parent;
     bool has_cycle;
     int cycle_depth, cycle_head, cycle_tail;
-    CycleData(const int &vertices): vertices{vertices} {
+    CycleData(const int vertices): vertices{vertices} {
         has_cycle = false;
         cycle_depth = 0;
         cycle_head = cycle_tail = -1;
@@ -198,7 +198,7 @@ struct CycleData{
 };
 
 /* Acyclic Graph are Bipartite Graph */
-bool detect_cycle(const Graph &g, CycleData &cd, const int &v, const int &parent){
+bool detect_cycle(const Graph &g, CycleData &cd, const int v, const int parent){
     ++cd.cycle_depth;
     if(cd.visited[v]) {
         cd.cycle_head = v;
@@ -215,7 +215,7 @@ bool detect_cycle(const Graph &g, CycleData &cd, const int &v, const int &parent
     return false;
 }
 
-CycleData find_cycle(const Graph &g, const int &v_low, const int &v_high) {
+CycleData find_cycle(const Graph &g, const int v_low, const int v_high) {
     CycleData cd(g.vertices);
     for(int i = v_low; i <= v_high; ++i){
         if(cd.visited[i]) continue;
@@ -250,23 +250,22 @@ vector<int> find_cycle(const CycleData &cd){
 //####################################################################################################################
 //####################################################################################################################
 
-
-
 /* 
 • Directed Weighted Graph
 • This is a simpler version of the above `struct Graph`
 */
 struct GraphVectorWeighted{
     struct Edge{
-        int vertex, cost;
-        Edge(const int &v, const int &c): vertex{v}, cost{c} {}
+        int vertex;
+        long cost;
+        Edge(const int v, const long c): vertex{v}, cost{c} {}
     };
     vector<vector<Edge>> adj;
     const int vertices;
 
-    inline GraphVectorWeighted(const int &t_vertices): vertices{t_vertices} { adj.resize(t_vertices); }
-    inline void add_edge(const int &v1, const int &v2, const int &cost){ adj[v1].emplace_back(v2, cost); }
-    inline const vector<Edge>& edge_iterator(const int &vertex) const { return adj[vertex]; }
+    inline GraphVectorWeighted(const int t_vertices): vertices{t_vertices} { adj.resize(t_vertices); }
+    inline void add_edge(const int v1, const int v2, const long cost){ adj[v1].emplace_back(v2, cost); }
+    inline const vector<Edge>& edge_iterator(const int vertex) const { return adj[vertex]; }
 };
 
 //##########################################################
@@ -344,7 +343,7 @@ TODO verify this
   any other implementation of priority_queue (like standard C++ STL) it
   should take E log(E) + V. (courtesy Roman Iedemskyi)
 */
-vector<long> dijkstras(const GraphVectorWeighted &g, const int &source/* , const int &destination */){
+vector<long> dijkstras(const GraphVectorWeighted &g, const int source/* , const int destination */){
     constexpr long INFINITY_LONG = static_cast<long>(1) << 61;
 
     // vector<int> parent(g.vertices, -1);
@@ -411,7 +410,7 @@ struct BellmanFordData{
 };
 
 // 𝗡𝗢𝗧𝗘: this is a mixture of BellmanFord and SFPA because we are using queue to only work on relaxed vertices
-BellmanFordData bellman_ford(const GraphVectorWeighted &g, const int &source){
+BellmanFordData bellman_ford(const GraphVectorWeighted &g, const int source){
     BellmanFordData bfdata(g.vertices);
     queue<int> q_to_process, q_next;
 
@@ -479,7 +478,7 @@ vector<vector<long>> floyds_warshalls(const GraphVectorWeighted &g){
 • In the SSSP (single-source shortest path) problem, we have to find shortest paths from a source vertex v to all other vertices in the graph.
 • More generalized version of 0-1 BFS is Dial's algorithm which works if every edge in the graph has a weight <= k
 */
-vector<int> bfs_0_1(const GraphVectorWeighted &g, const int &source){
+vector<int> bfs_0_1(const GraphVectorWeighted &g, const int source){
     constexpr int INF = 999'999'999;
     vector<int> dist(g.vertices, INF);
     vector<bool> visited(g.vertices, false);
@@ -517,7 +516,7 @@ struct GraphAdjMatrix{
 
     inline GraphAdjMatrix(): rows{N}, cols{M} {}
 
-    inline void set(const int &t_rows, const int &t_cols) {
+    inline void set(const int t_rows, const int t_cols) {
         rows = t_rows;
         cols = t_cols;
     }
@@ -526,7 +525,7 @@ struct GraphAdjMatrix{
         for(int i = 0; i < N; ++i) this->visited[i].reset();
     }
 
-    inline bool is_valid_point(const int &x, const int &y) const {
+    inline bool is_valid_point(const int x, const int y) const {
         return ((0 <= x && x < rows) and (0 <= y && y < cols));
     }
 };
@@ -592,7 +591,7 @@ int main(){
         cout << "\nCycle exists in g1\n";
         vector<int> cycle_arr = find_cycle(cd);
         cout << "    len = " << cycle_arr.size() << "\n    cycle = ";
-        for(int i = 0; i < cycle_arr.size(); ++i) cout << cycle_arr[i] << ' ';
+        for(size_t i = 0; i < cycle_arr.size(); ++i) cout << cycle_arr[i] << ' ';
     } else {
         cout << "\nCycle does NOT exist in g1";
     }
@@ -611,7 +610,7 @@ int main(){
     pair<GraphVectorWeighted,long> g2_mst = minimum_spanning_tree_kruskals(g2);
     cout << "MST for g2, cost = " << g2_mst.second << endl;
     cout << "MST Edges:";
-    for(int i = 0; i < g2.adj.size(); ++i){
+    for(size_t i = 0; i < g2.adj.size(); ++i){
         cout << "\n\t" << i << " : ";
         for(const auto &j: g2_mst.first.edge_iterator(i)) cout << "(" << j.vertex << "," << j.cost << ")" << " ";
     }
