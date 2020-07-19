@@ -49,6 +49,18 @@ template<int mod> inline ModInt<mod> operator*(const int64_t &n,const ModInt<mod
 template<int mod> inline ModInt<mod> operator/(const int64_t &n,const ModInt<mod> &m){return int64_t(m.v)*ModInt<mod>::mod_pow(n%mod,-1,mod)%mod;}
 template<int mod> inline ModInt<mod> mod_pow(ModInt<mod> r,int64_t n){ ModInt<mod> re(1); if(n<0)(n%=mod-1)+=mod-1; for(;n;n/=2){if(n&1) re*=r; r*=r;} return re;}
 
+
+template<typename T>
+struct ModularOperations{
+    const T M;
+    inline ModularOperations(const T m): M{m} {}
+    inline T add(const T a, const T b) const { return mod(a%M + b%M); }
+    inline T sub(const T a, const T b) const { return mod(a%M - b%M); }
+    inline T mul(const T a, const T b) const { return mod((a%M) * (b%M)); }
+    inline T div(const T a, const T b) const { return mod(a / b); }
+    inline T mod(const T a) const { return (a>=0) ? (a%M) : (a%M + M); }
+};
+
 //####################################################################################################################
 
 // Computes (val1 * val2) % mod
