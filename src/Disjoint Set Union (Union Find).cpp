@@ -88,6 +88,43 @@ struct DisjoinSetUnion{
 
 //##########################################################
 
+// REFER - 4th question (Locked Doors)
+// https://codingcompetitions.withgoogle.com/kickstart/submissions/000000000019ff08/YmVldC5haXp1
+struct UnionFind{
+    int num;
+    vector<int> rs, parent;
+    UnionFind(){}
+    UnionFind(int n):num(n),rs(n,1),parent(n,0){iota(parent.begin(),parent.end(),0);}
+
+    // find
+    int find_set(int x){
+        return (x==parent[x]? x : parent[x]=find_set(parent[x]));
+    }
+
+    // same
+    bool in_same_set(int x,int y){
+        return find_set(x)==find_set(y);
+    }
+
+    // unite
+    void union_sets(int x,int y){
+        x=find_set(x); y=find_set(y);
+        if(x==y) return;
+        if(rs[x] < rs[y]) swap(x,y);
+        rs[x] += rs[y];
+        parent[y] = x;
+        num--;
+    }
+
+    // returns size of set x
+    inline int size(int x) { return rs[find_set(x)]; }
+
+    // returns count of distinct sets
+    inline int count() const { return num; }
+};
+
+//##########################################################
+
 struct DisjoinSetUnion_Small{
     vector<int> parent;
     DisjoinSetUnion_Small(int vertices){
