@@ -1,5 +1,6 @@
 # Misc-Programming
 This repository contains various types of programs. Almost all program can compile with C++14. The following files require C++17: "Graph1.cpp", "Range Iteration.cpp"
+
 <!-- 
 
 •
@@ -13,6 +14,8 @@ This repository contains various types of programs. Almost all program can compi
     𝗥𝗘𝗙𝗘𝗥
     𝗡𝗢𝗧𝗘
     𝟬/𝟭-𝗶𝗻𝗱𝗲𝘅𝗲𝗱
+    𝗪𝗔𝗥𝗡𝗜𝗡𝗚
+    𝘁𝗼𝗼
 
 𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯
 𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕
@@ -28,6 +31,7 @@ This repository contains various types of programs. Almost all program can compi
   - [Tips](#tips)
   - [Useful Data Structures and Programs](#useful-data-structures-and-programs)
   - [Good code references](#good-code-references)
+  - [C++ tips](#c-tips)
 
 
 ## How to start
@@ -130,6 +134,35 @@ This repository contains various types of programs. Almost all program can compi
 - [https://github.com/trekhleb/javascript-algorithms](https://github.com/trekhleb/javascript-algorithms) - this repository give implementation, simple explanation and sources to refer for a particular topic
 - [https://github.com/indy256/codelibrary/](https://github.com/indy256/codelibrary/)
 - [http://e-maxx.ru/algo/](http://e-maxx.ru/algo/)
+
+
+## C++ tips
+- IMPORTANT: read the Question carefully
+- IMPORTANT: see INPUT limits carefully
+- IMPORTANT: if unable to get a solution, then take a small break and think in different direction.
+- Should be cautious about
+    * `int` overflow
+    * `array` bounds
+    * special test-cases
+-
+    ```cpp
+    int dp[10000]; /* will give better speed as compared to */
+    std::vector<int> dp(100000); /* however prefer using std::vector */
+    ```
+- Use iterators to traverse a data structure
+- Using ```#define MOD 1000000007``` will give better performance as compared to ```const int MOD = 1000000007;```
+- ```if(a != 0) result++;``` can be written as ```result += !!a;```
+- Use ```#include<bits/stdc++.h>``` for competitions but it will drastically increase the compilation time
+- The following snippet affects the input/output speed
+    ```cpp
+    std::ios_base::sync_with_stdio(false);
+    cin.tie(nullptr); cout.tie(nullptr);
+    cout.precision(20); cout << fixed;
+    ```
+- While testing the program for large input on local machine, always use 
+    ```sh
+    g++ -O2 fileName.cpp    # the -O2 will optimize the output file
+    ```
 
 
 <!-- ## Links to read -->
