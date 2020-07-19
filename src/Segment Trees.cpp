@@ -34,21 +34,26 @@ template<typename T, size_t N, typename CombinerFunction>
 struct SegmentTree{
     T arr[2*N];
     size_t n;
-    const T default_value;
+    T default_value;
     CombinerFunction combine;
 
-    SegmentTree(const T &t_default_value): n{N}, default_value{t_default_value}, combine() { this->reset(); }
+    SegmentTree(const T &t_default_value=T()): n{N}, default_value{t_default_value}, combine() { this->reset(); }
 
     inline size_t size() const { return n; }
-    inline void resize(const size_t &new_size) { n = new_size; }
+    inline void resize(const size_t new_size) { n = new_size; }
     inline void reset() { fill(arr, arr + 2*n, default_value); }
 
     /* Returns base array value at index `idx` */
-    inline T& operator [](const size_t &idx) { return arr[n+idx]; }
+    inline T& operator [](const size_t idx) { return arr[n+idx]; }
 
     // NOTE: we use `int` in the for loop to handle cases where n <= 0
     void build() {
         for(int i = n-1; i > 0; --i) arr[i] = combine(arr[i<<1], arr[(i<<1)^1]);
+    }
+
+    void build_idx(size_t idx) {
+        // NOTE: `(idx|1)^1` is always the left child and `idx|1` is always the right child
+        for(idx += n; idx > 1 ; idx >>= 1) arr[idx >> 1] = combine(arr[(idx|1)^1], arr[idx|1]);
     }
 
     void modify(size_t idx, const T &new_value) {
@@ -105,18 +110,18 @@ struct SegmentTreeSimple{
     const T default_value;
     CombinerFunction combine;
 
-    SegmentTreeSimple(const size_t &t_n, const T &t_default_value):
+    SegmentTreeSimple(const size_t t_n, const T &t_default_value):
         n_base{t_n}, default_value{t_default_value}, n{calculate_size(t_n)}, combine() 
     {
         this->reset();
     }
 
     inline size_t size() const { return n_base; }
-    inline void resize(const size_t &new_size) { n_base = new_size, n = calculate_size(new_size); }
+    inline void resize(const size_t new_size) { n_base = new_size, n = calculate_size(new_size); }
     inline void reset() { tree.assign(n, default_value); }
 
     /* Returns base array value at index `idx` */
-    inline T& operator [](const size_t &idx) { return tree[(n>>1) + idx]; }
+    inline T& operator [](const size_t idx) { return tree[(n>>1) + idx]; }
 
     void build() { 
         for(size_t i = (n >> 1)-1; i > 0; --i) tree[i] = combine(tree[i << 1], tree[(i << 1) ^ 1]);
@@ -146,7 +151,7 @@ struct SegmentTreeSimple{
 
     /* Returns size of complete binary tree to build segment tree for array of size `n` */
     template<typename SizeT>
-    static inline SizeT calculate_size(const SizeT &n){
+    static inline SizeT calculate_size(const SizeT n){
         // return 2 * pow(2, ceil(log2(n)));
         return (static_cast<SizeT>(1) << static_cast<SizeT>(ceil(log2(n)))) << 1;
     }
@@ -162,19 +167,19 @@ SegmentTreeSimpleRecursive{
     const T default_value;
     CombinerFunction combine;
 
-    SegmentTreeSimpleRecursive(const size_t &t_n, const T &t_default_value):
+    SegmentTreeSimpleRecursive(const size_t t_n, const T &t_default_value):
         n_base{t_n}, default_value{t_default_value}, n{calculate_size(t_n)}, combine() 
     {
         this->reset();
     }
 
     inline size_t size() const { return n_base; }
-    inline void resize(const size_t &new_size) { n_base = new_size, n = calculate_size(new_size); }
+    inline void resize(const size_t new_size) { n_base = new_size, n = calculate_size(new_size); }
     inline void reset() { tree.assign(n, default_value); }
 
     // NOTE: we use `int` in the for loop to handle cases where n <= 0
     template<typename RandomIt>
-    void build(const RandomIt &first, const size_t node_idx, const size_t u, const size_t v){
+    void build(const RandomIt first, const size_t node_idx, const size_t u, const size_t v){
         if(u > v) return;
         if(u == v) {
             tree[node_idx] = *next(first, u);
@@ -187,9 +192,9 @@ SegmentTreeSimpleRecursive{
     }
 
     template<typename RandomIt>
-    void build(const RandomIt &first) { build(first, 1, 0, n_base-1); }
+    void build(const RandomIt first) { build(first, 1, 0, n_base-1); }
 
-    void modify(const size_t &idx, const T &new_value, const size_t node_idx, const size_t u, const size_t v){
+    void modify(const size_t idx, const T &new_value, const size_t node_idx, const size_t u, const size_t v){
         if(idx < u || v < idx) return;
         if(u==v && idx==u){
             tree[node_idx] = new_value;
@@ -202,9 +207,9 @@ SegmentTreeSimpleRecursive{
         tree[node_idx] = combine(tree[node_idx << 1], tree[(node_idx << 1) ^ 1]);
     }
 
-    void modify(const size_t &idx, const T &new_value) { modify(idx, new_value, 1, 0, n_base-1); }
+    void modify(const size_t idx, const T &new_value) { modify(idx, new_value, 1, 0, n_base-1); }
 
-    T query(const size_t &l, const size_t &r, const size_t node_idx, const size_t u, const size_t v){
+    T query(const size_t l, const size_t r, const size_t node_idx, const size_t u, const size_t v){
         if(r < u || v < l) return default_value;
         if(l <= u && v <= r) return tree[node_idx];
         const size_t uv_by_2 = (u+v) >> 1;
@@ -212,11 +217,11 @@ SegmentTreeSimpleRecursive{
     }
 
     /* the result is equivalent to applying combine on the range [l, r), note that r is excluded */
-    T query(const size_t &l, const size_t &r) { return query(l, r-1, 1, 0, n_base-1); }
+    T query(const size_t l, const size_t r) { return query(l, r-1, 1, 0, n_base-1); }
 
     /* Returns size of complete binary tree to build segment tree for array of size `n` */
     template<typename SizeT>
-    static inline SizeT calculate_size(const SizeT &n){
+    static inline SizeT calculate_size(const SizeT n){
         // return 2 * pow(2, ceil(log2(n)));
         return (static_cast<SizeT>(1) << static_cast<SizeT>(ceil(log2(n)))) << 1;
     }
@@ -233,6 +238,42 @@ struct MyCombinerMax {
     template<typename T, typename S>
     inline auto operator()(const T &a, const S &b) const { return ((a > b) ? a : b); }
 };
+
+// 𝗡𝗢𝗧𝗘: the below solution to 2D Segment Tree and Fenwick Tree is 𝘁𝗼𝗼 slow
+// template<typename T, size_t N, typename CombinerFunction>
+// struct SegmentTreeCombiner{
+//     auto operator()(const SegmentTree<T, N, CombinerFunction> &a, const SegmentTree<T, N, CombinerFunction> &b) const {
+//         SegmentTree<T, N, CombinerFunction> st_res(0);
+//         for(size_t i = 0; i < 2*N; ++i) st_res.arr[i] = st_res.combine(a.arr[i], b.arr[i]);
+//         // for(int i = 0; i < N; ++i) st_res[i] = a[i] + b[i];
+//         // st_res.build();
+//         return st_res;
+//     }
+// };
+// 
+// SegmentTree<
+//     SegmentTree<int, 1001, plus<int>>,
+//     1001,
+//     SegmentTreeCombiner<int, 1001, plus<int>>
+// > bit2d(0);
+
+// template<typename T, typename CombinerFunction = plus<T>, typename SplitterFunction = minus<T>>
+// struct BinaryIndexTreeCombiner{
+//     auto operator()(const BinaryIndexTree<T, CombinerFunction, SplitterFunction> &a,
+//                     const BinaryIndexTree<T, CombinerFunction, SplitterFunction> &b) const {
+//         BinaryIndexTree<T, CombinerFunction, SplitterFunction> st_res(a.size());
+//         for(int32_t i = 0; i < st_res.n; ++i) st_res.bit[i] = st_res.combine(a.bit[i], b.bit[i]);
+//         // for(int i = 0; i < N; ++i) st_res[i] = a[i] + b[i];
+//         // st_res.build();
+//         return st_res;
+//     }
+// };
+// 
+// SegmentTree<
+//     BinaryIndexTree<int, plus<int>, minus<int>>,
+//     1001,
+//     BinaryIndexTreeCombiner<int, plus<int>, minus<int>>
+// > bit2d(BinaryIndexTree<int, plus<int>, minus<int>>(1001, 0));
 
 //####################################################################################################################
 
