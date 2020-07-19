@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <queue>
+#include <unordered_map>
 using namespace std;
 
 #define int int32_t
@@ -169,6 +170,42 @@ struct Trie{
         cout << "String present in Trie (in sorted order):\n";
         string s;
         print_strings(this->root.down, s);
+    }
+};
+
+
+
+// NOTE: NOT tested
+struct node{
+    unordered_map<char,pair<node*,int>> children;
+};
+
+struct trie{
+    node *parent;
+
+    trie() { parent = new node(); }
+
+    void add(const string &a){
+        node *current = parent;
+        for(auto &i: a){
+            if(current->children.find(i) == current->children.end()){
+                current->children[i].first = new node();
+                current->children[i].second = 0;
+            }
+            current = current->children[i].first;
+            current->children[i].second++;
+        }
+    }
+
+    bool exists(const string &a)const{
+        node *current = parent;
+        for(auto &i: a){
+            if(current->children.find(i) == current->children.end()){
+                return false;
+            }
+            current = current->children[i].first;
+        }
+        return true;
     }
 };
 
