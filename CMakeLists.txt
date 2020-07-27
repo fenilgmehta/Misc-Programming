@@ -10,7 +10,8 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 # add_subdirectory("78_HackerEarth")
 # add_subdirectory("Daily Coding Programs")
 
-file(GLOB sourceFILES *.cpp *.c)
+file(GLOB sourceFILES src/*.cpp src/*.c)
+#file(GLOB sourceFILES *.cpp *.c)
 
 FOREACH (sourceFile ${sourceFILES})
     get_filename_component(sourceFile_Path ${sourceFile} PATH)
