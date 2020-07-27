@@ -78,11 +78,11 @@ This repository contains various types of programs. Almost all program can compi
     * [x] GraphAdjMatrix - to store matrix of points
 5. [Segment Trees.cpp](./src/Segment%20Trees.cpp)
     * [x] SegmentTree - optimized to space complexity of O(2*N)
-        - Methods: size, resize, reset, operator[], build, modify, update, query, query_idx (for prefix sum)
+        - Methods: size, resize, reset, operator[], build, setval, update, query, query_idx (for prefix sum)
     * [x] SegmentTreeSimple - use complete binary tree and iterative algorithms
-        - Methods: size, resize, reset, operator[], build, modify, update, query
-    * [x] SegmentTreeSimpleRecursive - use complete binary tree and recursive algorithms
-        - Methods: size, resize, reset, build, modify, query
+        - Methods: size, resize, reset, operator[], build, setval, update, query
+    * [x] SegmentTreeSimpleLazy - use complete binary tree and recursive algorithms
+        - Methods: size, resize, reset, build, setval, query
 6. [Binary Index Tree (Fenwick Tree).cpp](./src/Binary%20Index%20Tree%20(Fenwick%20Tree).cpp)
     * [x] update
     * [x] query
