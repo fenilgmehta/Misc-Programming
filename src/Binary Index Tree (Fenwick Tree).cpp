@@ -15,6 +15,7 @@ using namespace std;
 REFER: https://www.topcoder.com/community/competitive-programming/tutorials/binary-indexed-trees/
 REFER: https://www.hackerearth.com/practice/data-structures/advanced-data-structures/fenwick-binary-indexed-trees/tutorial/
 
+NOTE: if size = 9, then VALID indexes for operations are in the range [1,9]
 NOTE: all index values in method parameters are assumed to be 𝟭-𝗶𝗻𝗱𝗲𝘅𝗲𝗱
 NOTE: all range based parameters are considered as INCLUSIVE, i.e. [l, r] ---> r is included
 
@@ -28,7 +29,6 @@ Operator precedence (Top is high)
 // NOTE: the below struct is used to store `Prefix Sum` by default
 template<typename T, typename CombinerFunction = plus<T>, typename SplitterFunction = minus<T>>
 struct BinaryIndexTree{
-
     typedef int32_t size_type;
     size_type n;
     vector<T> bit;
