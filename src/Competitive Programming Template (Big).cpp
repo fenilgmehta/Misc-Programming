@@ -72,6 +72,7 @@ template<typename T, typename S> inline bool contains(const T &container1, const
 template<typename T, typename S> inline auto min(const T a, const S b) { return ((a < b) ? a : b); }
 template<typename T, typename S> inline auto max(const T a, const S b) { return ((a > b) ? a : b); }
 
+/* WARNING: this only works when input is from getint(...) ONLY, NOT when intermixed with `cin` */
 template<typename T>
 inline T getint() {
     T val = 0;
