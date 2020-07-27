@@ -359,71 +359,157 @@ struct SegmentTreeSimple {
 
 //####################################################################################################################
 
-template<typename T, typename CombinerFunction>
-struct [[deprecated("Replaced by `SegmentTreeSimple`, which is faster, uses iterative algorithms, has an improved interface and provides more functionalities.")]]
-SegmentTreeSimpleRecursive{
+/* parents store the value after combining the value at both the children.
+ * NOTE: the actual elements need NOT be stored at the last level
+ * NOTE: the root is stored at index 1
+ * NOTE: all the operations are 0 indexed
+ *       Eg: if size = 9, then VALID indexes for various operations are in the range [0,9)
+ * NOTE: all the ranges are closed, i.e. range_query(a,b) ---> [a,b]
+ * QUESTION: https://cses.fi/problemset/task/1735/
+ * SOLUTION: https://cses.fi/problemset/hack/1735/entry/760717/  ---> 0.44
+ * SOLUTION: https://cses.fi/problemset/hack/1735/entry/760813/  ---> 0.35
+ **/
+template<typename T>
+struct SegmentTreeSimpleLazy {
+    static constexpr auto combine = plus<>();
     vector<T> tree;
-    size_t n, n_base;
+    size_t n_base, n;
     const T default_value;
-    CombinerFunction combine;
 
-    SegmentTreeSimpleRecursive(const size_t t_n, const T &t_default_value):
-        n_base{t_n}, default_value{t_default_value}, n{calculate_size(t_n)}, combine()
-    {
+    struct Lazy {
+        T add, mul;
+        bool isvalid;
+    };
+    vector<Lazy> lazy;
+
+    SegmentTreeSimpleLazy(const size_t t_n, const T &t_default_value) :
+            n_base{t_n}, n{calculate_size(t_n)}, default_value{t_default_value} {
         this->reset();
     }
 
-    inline size_t size() const { return n_base; }
-    inline void resize(const size_t new_size) { n_base = new_size, n = calculate_size(new_size); }
-    inline void reset() { tree.assign(n, default_value); }
+    /* Returns size of complete binary tree to build segment tree for array of size `n` */
+    template<typename SizeT>
+    static inline SizeT calculate_size(const SizeT n) {
+        // return 2 * pow(2, ceil(log2(n)));
+        return (static_cast<SizeT>(1) << static_cast<SizeT>(ceil(log2(n)))) << 1;
+    }
 
+    [[nodiscard]] inline size_t size() const { return n_base; }
+
+    inline void resize(const size_t new_size) {
+        n_base = new_size, n = calculate_size(new_size);
+        reset();
+    }
+
+    inline void reset() {
+        tree.assign(n, default_value);
+        lazy.assign(n, {0, 1, false});
+    }
+
+    template<typename RandomIt>
+    void build(const RandomIt first) { m_build(first, 1, 0, this->size() - 1); }
+
+    /* Inclusive setval -> range [l,r] */
+    void range_setval(size_t l, size_t r, const T &new_val) {
+        m_range_add_mul(l, r, new_val, 0, 1, 0, this->size() - 1);
+    }
+
+    /* Inclusive update -> range [l,r] */
+    void range_add(size_t l, size_t r, const T &diff) {
+        m_range_add_mul(l, r, diff, 1, 1, 0, this->size() - 1);
+    }
+
+    /* Inclusive update -> range [l,r] */
+    void range_mul(size_t l, size_t r, const T &mul_factor) {
+        m_range_add_mul(l, r, 0, mul_factor, 1, 0, this->size() - 1);
+    }
+
+    /* Inclusive query -> range [l,r] */
+    T range_query(size_t l, size_t r) {
+        return m_range_query(l, r, 1, 0, this->size() - 1);
+    }
+
+    /* NOTE: it is assumed that root is at index 1 */
+    static inline size_t LEFT(size_t idx) { return idx << 1u; }
+
+    static inline size_t RIGHT(size_t idx) { return idx << 1u | 1u; }
+
+    static inline size_t MID(size_t l, size_t r) { return (l + r) >> 1u; }
+
+private:
     // NOTE: we use `int` in the for loop to handle cases where n <= 0
     template<typename RandomIt>
-    void build(const RandomIt first, const size_t node_idx, const size_t u, const size_t v){
-        if(u > v) return;
-        if(u == v) {
+    void m_build(const RandomIt first, const size_t node_idx, const size_t u, const size_t v) {
+        if (u > v) return;
+        if (u == v) {
             tree[node_idx] = *next(first, u);
             return;
         }
-        const size_t uv_by_2 = (u+v) >> 1;
-        build(first, node_idx << 1, u, uv_by_2);
-        build(first, (node_idx << 1) ^ 1, uv_by_2+1, v);
-        tree[node_idx] = combine(tree[node_idx << 1], tree[(node_idx << 1) ^ 1]);
+        const size_t uv_by_2 = MID(u, v);
+        m_build(first, LEFT(node_idx), u, uv_by_2);
+        m_build(first, RIGHT(node_idx), uv_by_2 + 1, v);
+        tree[node_idx] = combine(tree[LEFT(node_idx)], tree[RIGHT(node_idx)]);
     }
 
-    template<typename RandomIt>
-    void build(const RandomIt first) { build(first, 1, 0, n_base-1); }
-
-    void setval(const size_t idx, const T &new_value, const size_t node_idx, const size_t u, const size_t v){
-        if(idx < u || v < idx) return;
-        if(u==v && idx==u){
-            tree[node_idx] = new_value;
-            return;
+    void m_push_down(size_t idx, size_t ll, size_t rr) {
+        tree[idx] = (tree[idx] * lazy[idx].mul) + ((rr - ll + 1) * lazy[idx].add);  // apply range addition update
+        if (ll != rr) {  // IF is NOT a leaf node, THEN push the lazy updates down
+            // NOTE: (mul * tree + add) * mul2 + add2 = (mul * mul2) * tree + (add * mul2 + add2)
+            lazy[LEFT(idx)] = {
+                    lazy[LEFT(idx)].add * lazy[idx].mul + lazy[idx].add,
+                    lazy[LEFT(idx)].mul * lazy[idx].mul,
+                    true
+            };
+            lazy[RIGHT(idx)] = {
+                    lazy[RIGHT(idx)].add * lazy[idx].mul + lazy[idx].add,
+                    lazy[RIGHT(idx)].mul * lazy[idx].mul,
+                    true
+            };
         }
-        const size_t uv_by_2 = (u+v) >> 1;
-        if(idx <= uv_by_2) setval(idx, new_value, node_idx << 1, u, uv_by_2);
-        else setval(idx, new_value, (node_idx << 1) ^ 1, uv_by_2+1, v);
-
-        tree[node_idx] = combine(tree[node_idx << 1], tree[(node_idx << 1) ^ 1]);
+        // Set the lazy value for current node as DEFAULT_VALUE as it has been pushed down
+        lazy[idx] = {0, 1, false};
     }
 
-    void setval(const size_t idx, const T &new_value) { setval(idx, new_value, 1, 0, n_base-1); }
+    T
+    m_range_add_mul(const size_t idxl, const size_t idxr, const T &diff, const T &mul_factor, size_t idx, size_t ll, size_t rr) {
+        // if outsize limit, then return
+        if (idxr < ll || rr < idxl)
+            return lazy[idx].isvalid ? (tree[idx] * lazy[idx].mul + (rr - ll + 1) * lazy[idx].add) : tree[idx];  /* ll > rr */
 
-    T query(const size_t l, const size_t r, const size_t node_idx, const size_t u, const size_t v){
-        if(r < u || v < l) return default_value;
-        if(l <= u && v <= r) return tree[node_idx];
-        const size_t uv_by_2 = (u+v) >> 1;
-        return combine(query(l, r, node_idx << 1, u, uv_by_2), query(l, r, (node_idx << 1) ^ 1, uv_by_2+1, v));
+        if (lazy[idx].isvalid) {  // there are pending updates
+            m_push_down(idx, ll, rr);
+        }
+        if (idxl <= ll && rr <= idxr) {  // Current segment is fully in range
+            // NOTE: (mul * tree + add) * mul2 + add2 = (mul * mul2) * tree + (add * mul2 + add2)
+            lazy[idx] = {diff, mul_factor, true};
+            return tree[idx] * lazy[idx].mul + (rr - ll + 1) * lazy[idx].add;
+        }
+
+        size_t mid = MID(ll, rr);
+        tree[idx] = combine(
+                m_range_add_mul(idxl, idxr, diff, mul_factor, LEFT(idx), ll, mid),
+                m_range_add_mul(idxl, idxr, diff, mul_factor, RIGHT(idx), mid + 1, rr)
+        );
+        return tree[idx];
     }
 
-    /* the result is equivalent to applying combine on the range [l, r), note that r is excluded */
-    T query(const size_t l, const size_t r) { return query(l, r-1, 1, 0, n_base-1); }
+    T m_range_query(const size_t idxl, const size_t idxr, size_t idx, size_t ll, size_t rr) {
+        // IF outsize limit, THEN return
+        if (idxr < ll || rr < idxl) return default_value;  /* ll > rr */
 
-    /* Returns size of complete binary tree to build segment tree for array of size `n` */
-    template<typename SizeT>
-    static inline SizeT calculate_size(const SizeT n){
-        // return 2 * pow(2, ceil(log2(n)));
-        return (static_cast<SizeT>(1) << static_cast<SizeT>(ceil(log2(n)))) << 1;
+        // Current segment is fully in range
+        if (idxl <= ll && rr <= idxr)
+            return lazy[idx].isvalid ? (tree[idx] * lazy[idx].mul + (rr - ll + 1) * lazy[idx].add) : tree[idx];
+
+        if (lazy[idx].isvalid) {  // there are pending updates
+            m_push_down(idx, ll, rr);
+        }
+
+        size_t mid = MID(ll, rr);
+        return combine(
+                m_range_query(idxl, idxr, LEFT(idx), ll, mid),
+                m_range_query(idxl, idxr, RIGHT(idx), mid + 1, rr)
+        );
     }
 };
 
