@@ -22,182 +22,183 @@ template <class T> void dbgIter(const char *sdbg, T a, T b) {cerr<<"\033[1;31m"<
  * 0-Indexed
  **/
 template<typename SS>
-struct DynamicTreeNode{
+struct DynamicTreeNode {
     SS data;
     DynamicTreeNode *left, *right;
-    DynamicTreeNode(const SS& val): data{val}, left{nullptr}, right{nullptr} {}
+
+    explicit DynamicTreeNode(const SS &val) : data{val}, left{nullptr}, right{nullptr} {}
 };
 
 template<typename T, typename CombinerFunction>
-struct DynamicTree{
-    using Node=DynamicTreeNode<T>;
+struct DynamicTree {
+    using Node = DynamicTreeNode<T>;
     size_t n;
     T default_value;
     CombinerFunction combine;
     Node *root;
 
-    DynamicTree(size_t t_n, const T& t_default_value=T()):
-        n{t_n}, default_value{t_default_value}, combine(), root{new Node(t_default_value)} {}
+    explicit DynamicTree(size_t t_n, const T &t_default_value = T()) :
+            n{t_n}, default_value{t_default_value}, combine(), root{new Node(t_default_value)} {}
 
     ~DynamicTree() { free_node(root); }
 
-    void free_node(Node *ptr){
-        if(ptr==nullptr) return;
+    void free_node(Node *ptr) {
+        if (ptr == nullptr) return;
         free_node(ptr->left);
         free_node(ptr->right);
         delete ptr;
     }
 
-    inline T& get_val(Node *ptr) { return (ptr==nullptr) ? default_value : (ptr->data); }
+    inline T &get_val(Node *ptr) { return (ptr == nullptr) ? default_value : (ptr->data); }
 
     template<typename RandomIt>
-    Node* build(RandomIt first, Node *ptr, size_t l, size_t r){
-        if(ptr == nullptr) ptr = new Node(default_value);
-        if(l==r) {
+    Node *build(RandomIt first, Node *ptr, size_t l, size_t r) {
+        if (ptr == nullptr) ptr = new Node(default_value);
+        if (l == r) {
             ptr->data = *next(first, l);
             return ptr;
         }
-        size_t mid = (l+r) >> 1;
+        size_t mid = (l + r) >> 1;
         ptr->left = build(first, ptr->left, l, mid);
-        ptr->right = build(first, ptr->right, mid+1, r);
+        ptr->right = build(first, ptr->right, mid + 1, r);
         ptr->data = combine(ptr->left->data, ptr->right->data);
         // NOTE: get_val(...) is NOT necessary here as children of ptr will always be defined
         return ptr;
     }
 
     template<typename RandomIt>
-    void build(RandomIt first) { root = build(first, root, 0, n-1); }
+    void build(RandomIt first) { root = build(first, root, 0, n - 1); }
 
-    Node* setval(size_t idx, const T& new_val, Node *ptr, size_t l, size_t r) {
-        if(idx < l || r < idx) return ptr;
-        if(ptr==nullptr) ptr = new Node(default_value);
-        if(l==r) {
+    Node *setval(size_t idx, const T &new_val, Node *ptr, size_t l, size_t r) {
+        if (idx < l || r < idx) return ptr;
+        if (ptr == nullptr) ptr = new Node(default_value);
+        if (l == r) {
             // l==idx && r==idx, will always be true if l==r because of the first condition, i.e. (idx < l || r < idx)
             ptr->data = new_val;
             return ptr;
         }
-        size_t mid = (l+r) >> 1;
+        size_t mid = (l + r) >> 1;
         ptr->left = setval(idx, new_val, ptr->left, l, mid);
-        ptr->right = setval(idx, new_val, ptr->right, mid+1, r);
+        ptr->right = setval(idx, new_val, ptr->right, mid + 1, r);
         ptr->data = combine(get_val(ptr->left), get_val(ptr->right));
         return ptr;
     }
 
-    void setval(size_t idx, const T& new_val) { root = setval(idx, new_val, root, 0, n-1); }
+    void setval(size_t idx, const T &new_val) { root = setval(idx, new_val, root, 0, n - 1); }
 
-    Node* update(size_t idx, const T& diff, Node *ptr, size_t l, size_t r){
-        if(idx < l || r < idx) return ptr;
-        if(ptr== nullptr) ptr = new Node(default_value);
-        if(l==r){
+    Node *update(size_t idx, const T &diff, Node *ptr, size_t l, size_t r) {
+        if (idx < l || r < idx) return ptr;
+        if (ptr == nullptr) ptr = new Node(default_value);
+        if (l == r) {
             ptr->data = combine(ptr->data, diff);
             return ptr;
         }
-        size_t mid = (l+r) >> 1;
+        size_t mid = (l + r) >> 1;
         ptr->left = update(idx, diff, ptr->left, l, mid);
-        ptr->right = update(idx, diff, ptr->right, mid+1, r);
+        ptr->right = update(idx, diff, ptr->right, mid + 1, r);
         ptr->data = combine(get_val(ptr->left), get_val(ptr->right));
         return ptr;
     }
 
-    void update(size_t idx, const T& diff) { root = update(idx, diff, root, 0, n-1); }
+    void update(size_t idx, const T &diff) { root = update(idx, diff, root, 0, n - 1); }
 
-    T query(const size_t idxl, const size_t idxr, Node *ptr, size_t ll, size_t rr){
+    T query(const size_t idxl, const size_t idxr, Node *ptr, size_t ll, size_t rr) {
         // cerr << endl; db(idxl << ", " << idxr << ", " << ptr << ", " << get_val(ptr) << ", " << ll << ", " << rr);
-        if(ptr == nullptr || idxr < ll || rr < idxl) return default_value;
-        if(idxl <= ll && rr <= idxr) return ptr->data;
-        size_t mid = (ll+rr) >> 1;
+        if (ptr == nullptr || idxr < ll || rr < idxl) return default_value;
+        if (idxl <= ll && rr <= idxr) return ptr->data;
+        size_t mid = (ll + rr) >> 1;
         return combine(
-            query(idxl, idxr, ptr->left, ll, mid),
-            query(idxl, idxr, ptr->right, mid+1, rr)
+                query(idxl, idxr, ptr->left, ll, mid),
+                query(idxl, idxr, ptr->right, mid + 1, rr)
         );
     }
 
     /* returns combine on the range [idxl, idxr) */
-    T query(size_t idxl, size_t idxr) { return query(idxl, idxr-1, root, 0, n-1); }
+    T query(size_t idxl, size_t idxr) { return query(idxl, idxr - 1, root, 0, n - 1); }
 
-    pair<bool, const T&> at(size_t idx, Node *ptr, size_t l, size_t r) {
-        if(ptr == nullptr) root = ptr = new Node(default_value);
-        while(l!=r){
-            size_t mid = (l+r) >> 1;
-            if(idx <= mid) {
-                if(ptr->left == nullptr) return {false, default_value};
+    pair<bool, const T &> at(size_t idx, Node *ptr, size_t l, size_t r) {
+        if (ptr == nullptr) root = ptr = new Node(default_value);
+        while (l != r) {
+            size_t mid = (l + r) >> 1;
+            if (idx <= mid) {
+                if (ptr->left == nullptr) return {false, default_value};
                 r = mid;
                 ptr = ptr->left;
             } else {
-                if(ptr->right == nullptr) return {false, default_value};
-                l = mid+1;
+                if (ptr->right == nullptr) return {false, default_value};
+                l = mid + 1;
                 ptr = ptr->right;
             }
         }
-        if(idx==l) return {true, ptr->data};
+        if (idx == l) return {true, ptr->data};
 
-        cout << "ERROR in at(...): idx="<<idx<<", l="<<l<<endl;
+        cout << "ERROR in at(...): idx=" << idx << ", l=" << l << endl;
         return {true, ptr->data};
     }
 
-    pair<bool, const T&> at(size_t idx) { return at(idx, root, 0, n-1); }
+    pair<bool, const T &> at(size_t idx) { return at(idx, root, 0, n - 1); }
 
-    pair<bool, const T&> operator[](size_t idx) { return at(idx); }
+    pair<bool, const T &> operator[](size_t idx) { return at(idx); }
 
     // REFER: https://stackoverflow.com/a/47400572
-    void printTree(Node *curr,int depth) {
+    void printTree(Node *curr, int depth) {
         static int rec[1000006];
         int i;
-        if(curr==NULL)return;
+        if (curr == nullptr)return;
         printf("\t");
-        for(i=0;i<depth;i++)
-            if(i==depth-1)
-                printf("%s———",rec[depth-1]?"\u0371":"\u221F");  // \u2014\u2014\u2014   ———
+        for (i = 0; i < depth; i++)
+            if (i == depth - 1)
+                printf("%s———", rec[depth - 1] ? "\u0371" : "\u221F");  // \u2014\u2014\u2014   ———
             else
-                printf("%s   ",rec[i]?"⎸":" ");  //   "⎸":"  "     "\u23B8":"  "
-        printf("%d\n",curr->data);
-        rec[depth]=1;
-        printTree(curr->right,depth+1);
-        rec[depth]=0;
-        printTree(curr->left,depth+1);
+                printf("%s   ", rec[i] ? "⎸" : " ");  //   "⎸":"  "     "\u23B8":"  "
+        printf("%d\n", curr->data);
+        rec[depth] = 1;
+        printTree(curr->right, depth + 1);
+        rec[depth] = 0;
+        printTree(curr->left, depth + 1);
     }
 
-    void printTree(){ printTree(root, 0); }
+    void printTree() { printTree(root, 0); }
 };
 
 template<typename T, typename CombinerFunction>
-struct DynamicTreePersistent{
-    using Node=DynamicTreeNode<T>;
+struct DynamicTreePersistent {
+    using Node = DynamicTreeNode<T>;
     static constexpr Node *tempNull = new Node();
     DynamicTree<T, CombinerFunction> dt;
-    vector<Node*> roots;
+    vector<Node *> roots;
 
-    DynamicTreePersistent(size_t t_n, const T& t_default_value=T()): dt(t_n, t_default_value) {
+    explicit DynamicTreePersistent(size_t t_n, const T &t_default_value = T()) : dt(t_n, t_default_value) {
         roots.push_back(dt.root);
     }
 
-    Node* setval(size_t idx, const T& new_val, Node *ptr, size_t ll, size_t rr){
-        if(idx < ll || rr < idx) return ptr;
+    Node *setval(size_t idx, const T &new_val, Node *ptr, size_t ll, size_t rr) {
+        if (idx < ll || rr < idx) return ptr;
         Node *newNode = new Node();
-        if(ll==rr){
+        if (ll == rr) {
             newNode->data = new_val;
             return newNode;
         }
 
-        if(ptr == nullptr) ptr = tempNull;
-        size_t mid = (ll+rr) >> 1;
-        if(idx <= mid) {  // move left
+        if (ptr == nullptr) ptr = tempNull;
+        size_t mid = (ll + rr) >> 1;
+        if (idx <= mid) {  // move left
             newNode->left = setval(idx, new_val, ptr->left, ll, mid);
             newNode->right = ptr->right;
         } else {  // move right
             newNode->left = ptr->left;
-            newNode->right = setval(idx, new_val, ptr->right, mid+1, rr);
+            newNode->right = setval(idx, new_val, ptr->right, mid + 1, rr);
         }
         newNode->data = dt.combine(newNode->left, newNode->right);
         return newNode;
     }
 
-    void setval(size_t idx, const T& new_val, size_t idx_root) {
-        roots.push_back(setval(idx, new_val, roots.at(idx_root), 0, dt.n-1));
+    void setval(size_t idx, const T &new_val, size_t idx_root) {
+        roots.push_back(setval(idx, new_val, roots.at(idx_root), 0, dt.n - 1));
     }
 
-    T query(size_t idxl, size_t idxr, size_t idx_root){
-        return dt.query(idxl, idxr, roots.at(idx_root), 0, dt.n-1);
+    T query(size_t idxl, size_t idxr, size_t idx_root) {
+        return dt.query(idxl, idxr, roots.at(idx_root), 0, dt.n - 1);
     }
 
     inline size_t count() const { return roots.size(); }
@@ -224,34 +225,36 @@ A similar data structure is the interval tree.
 
 */
 template<typename T, size_t N, typename CombinerFunction>
-struct SegmentTree{
-    T arr[2*N];
+struct SegmentTree {
+    T arr[2 * N];
     size_t n;
     T default_value;
     CombinerFunction combine;
 
-    SegmentTree(const T &t_default_value=T()): n{N}, default_value{t_default_value}, combine() { this->reset(); }
+    explicit SegmentTree(const T &t_default_value = T()) : n{N}, default_value{t_default_value}, combine() { this->reset(); }
 
     inline size_t size() const { return n; }
+
     inline void resize(const size_t new_size) { n = new_size; }
-    inline void reset() { fill(arr, arr + 2*n, default_value); }
+
+    inline void reset() { fill(arr, arr + 2 * n, default_value); }
 
     /* Returns base array value at index `idx` */
-    inline T& operator [](const size_t idx) { return arr[n+idx]; }
+    inline T &operator[](const size_t idx) { return arr[n + idx]; }
 
     // NOTE: we use `int` in the for loop to handle cases where n <= 0
     void build() {
-        for(int i = n-1; i > 0; --i) arr[i] = combine(arr[i<<1], arr[(i<<1)^1]);
+        for (int i = n - 1; i > 0; --i) arr[i] = combine(arr[i << 1], arr[(i << 1) ^ 1]);
     }
 
     void build_idx(size_t idx) {
         // NOTE: `(idx|1)^1` is always the left child and `idx|1` is always the right child
-        for(idx += n; idx > 1 ; idx >>= 1) arr[idx >> 1] = combine(arr[(idx|1)^1], arr[idx|1]);
+        for (idx += n; idx > 1; idx >>= 1) arr[idx >> 1] = combine(arr[(idx | 1) ^ 1], arr[idx | 1]);
     }
 
     void setval(size_t idx, const T &new_value) {
         // NOTE: `(idx|1)^1` is always the left child and `idx|1` is always the right child
-        for(arr[idx += n] = new_value; idx > 1 ; idx >>= 1) arr[idx >> 1] = combine(arr[(idx|1)^1], arr[idx|1]);
+        for (arr[idx += n] = new_value; idx > 1; idx >>= 1) arr[idx >> 1] = combine(arr[(idx | 1) ^ 1], arr[idx | 1]);
     }
 
     void update(size_t idx, const T &diff) {
@@ -261,9 +264,9 @@ struct SegmentTree{
     /* the result is equivalent to applying combine on the range [l, r), note that r is excluded */
     T query(size_t l, size_t r) const {
         T resl = default_value, resr = default_value;
-        for(l+=n, r+=n; l < r; l>>=1, r>>=1) {
-            if(l & 1) resl = combine(resl, arr[l++]);
-            if(r & 1) resr = combine(arr[--r], resr);
+        for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) resl = combine(resl, arr[l++]);
+            if (r & 1) resr = combine(arr[--r], resr);
         }
         return combine(resl, resr);
     }
@@ -273,18 +276,18 @@ struct SegmentTree{
      * */
     int query_idx(const T &value) const {
         int i = n;
-        while(i > 0) {
-            while(not (i & 1)) i >>= 1;  // keep going to the parent if `i` is even
+        while (i > 0) {
+            while (not(i & 1)) i >>= 1;  // keep going to the parent if `i` is even
 
             // now `i` is odd, i.e. it is root of the sub-SegmentTree
-            while(i < n && arr[i] >= value) {
-                if(arr[i << 1] >= value) i <<= 1;  // left child
+            while (i < n && arr[i] >= value) {
+                if (arr[i << 1] >= value) i <<= 1;  // left child
                 else i = i << 1 | 1;               // right child
             }
 
-            if(i >= n && arr[i] >= value) return i - n;
+            if (i >= n && arr[i] >= value) return i - n;
 
-            if(i==1) break;
+            if (i == 1) break;
             ++i;
         }
         return -1;
@@ -300,33 +303,34 @@ struct SegmentTree{
  *       Eg: if size = 9, then VALID indexes for various operations are in the range [0,9)
  **/
 template<typename T, typename CombinerFunction>
-struct SegmentTreeSimple{
+struct SegmentTreeSimple {
     vector<T> tree;
     size_t n_base, n;
     const T default_value;
     CombinerFunction combine;
 
-    SegmentTreeSimple(const size_t t_n, const T &t_default_value):
-        n_base{t_n}, n{calculate_size(t_n)}, default_value{t_default_value}, combine()
-    {
+    SegmentTreeSimple(const size_t t_n, const T &t_default_value) :
+            n_base{t_n}, n{calculate_size(t_n)}, default_value{t_default_value}, combine() {
         this->reset();
     }
 
     inline size_t size() const { return n_base; }
+
     inline void resize(const size_t new_size) { n_base = new_size, n = calculate_size(new_size); }
+
     inline void reset() { tree.assign(n, default_value); }
 
     /* Returns base array value at index `idx` */
-    inline T& operator [](const size_t idx) { return tree[(n>>1) + idx]; }
+    inline T &operator[](const size_t idx) { return tree[(n >> 1) + idx]; }
 
     void build() {
-        for(size_t i = (n >> 1)-1; i > 0; --i) tree[i] = combine(tree[i << 1], tree[(i << 1) ^ 1]);
+        for (size_t i = (n >> 1) - 1; i > 0; --i) tree[i] = combine(tree[i << 1], tree[(i << 1) ^ 1]);
     }
 
     void setval(size_t idx, const T &new_value) {
         idx += (n >> 1);
         tree[idx] = new_value;
-        for(idx >>= 1; idx > 0; idx >>= 1) tree[idx] = combine(tree[idx << 1], tree[(idx << 1) ^ 1]);
+        for (idx >>= 1; idx > 0; idx >>= 1) tree[idx] = combine(tree[idx << 1], tree[(idx << 1) ^ 1]);
     }
 
     void update(size_t idx, const T &diff) {
@@ -336,18 +340,18 @@ struct SegmentTreeSimple{
     /* the result is equivalent to applying combine on the range [l, r), note that r is excluded */
     T query(size_t l, size_t r) const {
         T resl = default_value, resr = default_value;
-        l += (n>>1);
-        r += (n>>1);
-        for(; l < r; l>>=1, r>>=1){
-            if(l&1) resl = combine(resl, tree[l++]);
-            if(r&1) resr = combine(tree[--r], resr);
+        l += (n >> 1);
+        r += (n >> 1);
+        for (; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) resl = combine(resl, tree[l++]);
+            if (r & 1) resr = combine(tree[--r], resr);
         }
         return combine(resl, resr);
     }
 
     /* Returns size of complete binary tree to build segment tree for array of size `n` */
     template<typename SizeT>
-    static inline SizeT calculate_size(const SizeT n){
+    static inline SizeT calculate_size(const SizeT n) {
         // return 2 * pow(2, ceil(log2(n)));
         return (static_cast<SizeT>(1) << static_cast<SizeT>(ceil(log2(n)))) << 1;
     }
