@@ -42,6 +42,13 @@ This repository contains various types of programs. Almost all program can compi
     * [Competitive Programmer’s Handbook - Antti Laaksonen Draft August 19, 2019](https://github.com/pllk/cphb/blob/f269ae391910742788ac0d6626df1e221281f191/book.pdf)
 - [How to start Competitive Programming?](https://youtu.be/xAeiXy8-9Y8)
 - [How To Become Red Coder? (codeforces.com)](https://youtu.be/y7169jEvb-Y)
+    * Summary of the video tips
+        1. Practice - solve problems
+        2. If you don't know algorithms, you can start to solve problems which have editorials - problems that have an analysis by the organizers. Maybe for the first time you will encounter DFS, then google DFS, solve a few more problems on DFS and you can go back to randomly solving problems.
+        3. Choose levels slightly above your comfort zone (i.e. slightly above your level). Not too much above your level, otherwise you won't understand how to solve and will get demotivated. Neither below your level, otherwise there is no learning.
+        4. Solve a lot of problems
+        5. For beginners and medium level participants - after being stuck for about 20-30 minutes, look at the answer. Read the answer till the end, if you needed.
+        6. Once the problem is solved, look at the top/best solutions for the same question to understand how top programmers think and solve the problem.
 - [Don't Make These Mistakes (1st and 2nd Year)](https://youtu.be/-_gRnYmWkCE)
 - [How do competitive programmers become so good at problem solving skills ? What is their approach in solving a high level programming question ?](https://www.quora.com/How-do-competitive-programmers-become-so-good-at-problem-solving-skills-what-is-their-approach-in-solving-a-high-level-programming-question)
 - [How smart are red coders ?](https://www.quora.com/How-smart-are-the-red-coders-on-TopCoder)
