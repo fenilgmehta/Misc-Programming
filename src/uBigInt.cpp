@@ -379,12 +379,17 @@ struct uBigInt {
  * */
 uBigInt factorial(int32_t n, int32_t low = 1) {
     if ((n - low + 1) <= 10) {
-        uBigInt r(1);
-        for (int32_t i = low; i <= n; ++i) r *= i;
+        uBigInt r(low);
+        for (int32_t i = low + 1; i <= n; ++i) r *= i;
         return r;
     }
-    uBigInt temp = factorial((n + low) / 2, low);
-    return temp *= factorial(n, (n + low) / 2 + 1);
+    // REFER: https://ai.googleblog.com/2006/06/extra-extra-read-all-about-it-nearly.html#:~:text=nearly%20all%20binary%20searches%20and%20mergesorts%20are%20broken
+    // WRONG: POSSIBLE integer overflow
+    //     int mid = (low + high) / 2;
+    // CORRECT
+    //     int mid = low + ((high - low) / 2);
+    uBigInt temp = factorial(low + ((n - low) / 2), low);
+    return temp *= factorial(n, low + ((n - low) / 2) + 1);
 }
 
 //####################################################################################################################
