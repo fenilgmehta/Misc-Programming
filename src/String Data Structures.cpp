@@ -259,7 +259,11 @@ Manacher's Algorithm
     https://www.geeksforgeeks.org/manachers-algorithm-linear-time-longest-palindromic-substring-part-4/
 */
 
-/* Input: "ababaaa"  --->  Output: [1, 2, 3, 2, 1, 2, 1] */
+/*
+    Output :  <-3->
+    Input  : "ababaaa"  --->  Output: [1, 2, 3, 2, 1, 2, 1]
+    Value "X" in Output means that length of palindrome is "2*X - 1"
+*/
 vector<int> manacher_odd(const string &s){
     // bool debug = (s=="bababaababbabaaababaaaaa") ? true : false;
     const int n = s.size();
@@ -267,16 +271,23 @@ vector<int> manacher_odd(const string &s){
     for(int i=0, c=0, r=0; i < n; ++i){
         // if(debug) db(i,c,r, d1[c-(i-c)], r-i+1);
         int &k = d1[i];
-        k = (i < r) ? min(d1[c-(i-c)], r-i+1) : 1;  // use previous value
-        while(0 <= (i-k) && (i+k) < n && s[i-k]==s[i+k]) ++k;  // trivial matching
+        k = (i < r) ? min(d1[c-(i-c)], r-i+1) : 1;  // use previous value "if i < r"
+        while(0 <= (i-k) && (i+k) < n && s[i-k]==s[i+k]) ++k;  // trivial matching/expansion
         if(r < (i+k-1)) c=i, r=i+k-1;  // update center `c` and right `r`
     }
     return d1;
 }
 
-/*              5 */
-/* Input: "ababa|aa"  --->  Output: [0, 0, 0, 0, 0, 1, 1] */
-/*         01234 56 */
+/*
+    Output Index  :  0     5                    0              5
+    Input1        : "|ababa|aa"  --->  Output: [0, 0, 0, 0, 0, 1, 1]
+    Input1 Index  :   01234 56
+
+    Output Index  :  0       4 5 6 7 8
+    Output        :  0 0 0 0 0 0 3 0 0    (c=6, r=8)
+    Input2        : "|z y x c b a|a b c"
+    Input2 Index  :   0 1 2 3 4 5 6 7 8
+*/
 vector<int> manacher_even(const string &s){
     // bool debug = (s=="bababaababbabaaababaaaaa") ? true : false;
     const int n = s.size();
@@ -284,12 +295,17 @@ vector<int> manacher_even(const string &s){
     for(int i=1, c=0, r=0; i < n; ++i){
         // if(debug) db(i,c,r, d2[c-(i-c)], r-i+1);
         int &k = d2[i];
-        k = (i <= r) ? min(d2[c-(i-c)],r-i+1) : 0;
-        while(0 <= (i-k-1) && (i+k) < n && s[i-k-1]==s[i+k]) ++k;
-        if(r < (i+k-1)) c=i, r=i+k-1;
+        k = (i <= r) ? min(d2[c-(i-c)],r-i+1) : 0;  // Input2, i=7
+        while(0 <= (i-k-1) && (i+k) < n && s[i-k-1]==s[i+k]) ++k;  // trivial matching/expansion
+        if(r < (i+k-1)) c=i, r=i+k-1;  // update center `c` and right `r`
     }
     return d2;
 }
+
+// Leet Code - Longest Palindrome Substring
+// Refer: https://leetcode.com/problems/longest-palindromic-substring/
+// Solution using Manacher's Algorithm: https://www.youtube.com/watch?v=XYQecbcd6_c
+
 
 bool is_palindrome(const string &s){
     int n = s.size();
