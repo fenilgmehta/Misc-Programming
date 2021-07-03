@@ -162,6 +162,9 @@ This repository contains various types of programs. Almost all program can compi
     * Read [C++ STL: Policy based data structures](https://codeforces.com/blog/entry/11080)
         - `Tag` — class denoting a tree structure, which we will use. There are three base-classes provided in STL for this, it is `rb_tree_tag` (red-black tree), `splay_tree_tag` (splay tree) and `ov_tree_tag` (ordered-vector tree). Sadly, at competitions we can use only red-black trees for this because splay tree and OV-tree using linear-timed split operation that prevents us to use them.
     * Read [Blowing up unordered_map](https://codeforces.com/blog/entry/62393)
+13. Notes
+    - Generally recursive implementations are better than iterative implementation - [testing and comparison](./src_others/010_notes_Comparison-of-Recursive-and-Iterative-Implementations.md)
+        - However, sometime iterative can also be good. It depends on the use case and the constraints under which the problem has to be solved. Example: if we have to traverse a binary tree in `O(n)` time and `O(1)` space complexity, then iterative implementation (i.e. Morris Traversal) is better than other recursion (because recursion has `O(log(n))` space complexity) and stack based iterative implementations.
 
 
 
