@@ -8,12 +8,13 @@ template <class T>ostream& operator <<(ostream& os, const vector<T>& p) {os << "
 template <class T>ostream& operator <<(ostream& os, const set<T>& p) {os << "\033[1;32m" << "set[ "; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
 template <class S, class T>ostream& operator <<(ostream& os, const map<S, T>& p) {os << "\033[1;32m" << "map[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
 template <class S, class T>ostream& operator <<(ostream& os, const unordered_map<S, T>& p) {os << "\033[1;32m" << "unordered_map[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-template <typename Arg, typename... Args> inline void printErr(Arg&& arg, Args&&... args) { cerr << arg; (void)(int[]){0, (void(cerr << " "<<"\033[5;31m"<<"●"<<"\033[0m"<<" " << args),0)...}; cerr << '\n'; }
-template<class T, class... U> void dbg(const int line, const char *sdbg, T h, U... a) {cerr<<"\033[1;"<<to_string(35+line%2)<<"m"<<line<<":\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<" "<<"\033[1;31m"<<"="<<"\033[0m"<<" "; printErr(h, a...); cout.flush(); cerr.flush();}
-template <class T> void dbgIter(const int line, const char *sdbg, T a, T b) {cerr<<"\033[1;"<<to_string(35+line%2)<<"m"<<line<<":\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n"; cout.flush(); cerr.flush();}
+template <typename Arg, typename... Args> inline void printErr(Arg&& arg, Args&&... args) { cerr << arg; (void)(int[]){0, (void(cerr << " "<<"\033[1;34m"<<"●"<<"\033[0m"<<" " << args),0)...}; cerr << '\n'; }
+template<class T, class... U> void dbg(const int line, const char *sdbg, T h, U... a) {cerr<<"\033[1;"<<to_string(35+line%2)<<"m"<<line<<":\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<setw(15)<<sdbg; cerr<<" "<<"\033[1;31m"<<"="<<"\033[0m"<<" "; printErr(h, a...); cout.flush(); cerr.flush();}
+template <class T> void dbgIter(const int line, const char *sdbg, T a, T b) {cerr<<"\033[1;"<<to_string(35+line%2)<<"m"<<line<<":\033[1;31m"<<"Debug: "<<"\033[0m"; cerr<<setw(15)<<sdbg; cerr<<"\033[1;31m"<<" = "<<"\033[0m"; cerr << "["; for (T i = a; i != b; ++i) {if (i != a) cerr << ", "; cerr << *i;} cerr << "]\n"; cout.flush(); cerr.flush();}
 #define db1(a)                          if(#a[0]!='0'){dbg(__LINE__, #a, a);}
 #define db11(a,b,c,d,e,f,g,h,i,j,k,...) {db1(a);db1(b);db1(c);db1(d);db1(e);db1(f);db1(g);db1(h);db1(i);db1(j);db1(k);}
 #define db(...)                         db11(__VA_ARGS__,0,0,0,0,0,0,0,0,0,0,0)
+#define dbl(...)                        dbg(__LINE__, #__VA_ARGS__, __VA_ARGS__)
 #define dbiter(...)                     dbgIter(__LINE__, #__VA_ARGS__, __VA_ARGS__);
 #else
 #define db(...) ;
@@ -53,8 +54,8 @@ void solve(){
 
 int main() {
     std::ios_base::sync_with_stdio(false);
-    cin.tie(nullptr); cout.tie(nullptr);
-    cout.precision(20); cout << fixed;
+    std::cin.tie(nullptr);
+    std::cout.precision(20); std::cout << std::fixed;
 
     int T = 1;
     // TODO: remove below statement if only single testcase
