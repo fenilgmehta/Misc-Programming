@@ -23,23 +23,41 @@
 //       2. using IDE CMakeLists.txt
 //       3. using `g++ name.cpp -DMY_LOGGING_ON`
 
+// REFER: https://stackoverflow.com/questions/142508/how-do-i-check-os-with-a-preprocessor-directive
+#ifdef _WIN32
+    // Windows OS
+    #define MULTI_VAR_SEPARATOR "~"
+#else
+    // Linux/Mac OS
+    #define MULTI_VAR_SEPARATOR "●"
+    #define USE_COLORS_IN_OUTPUT
+#endif
 
-#define printFunction(outStream, functionName, argDelimiter, lineDelimiter) template<typename Arg, typename... Args> inline void functionName(Arg&& arg, Args&&... args) { outStream << arg; (void)(int[]){0, (void(outStream << argDelimiter << args),0)...}; outStream << lineDelimiter; }
-#ifdef MY_LOGGING_ON
-    printFunction(std::cerr, printErr, " "<<"\033[1;34m"<<"●"<<"\033[0m"<<" ", '\n');
-    template<class T, class... U> void dbg(int32_t lineNo, const char *sdbg, T h, U... a) {std::cerr<<"\033[1;"<<std::to_string(35+lineNo%2)<<"m"<<lineNo<<":\033[1;31m"<<"Debug: "<<"\033[0m"; std::cerr<<std::setw(15)<<sdbg; std::cerr<<" "<<"\033[1;31m"<<"="<<"\033[0m"<<" "; printErr(h, a...); std::cout.flush(); std::cerr.flush();}
-    template <class S, class T> std::ostream& operator <<(std::ostream& os, const std::pair<S, T>& p) {return os << "pair(" << p.first << "\033[1;31m" << ", " << "\033[0m" << p.second << ")";}
-    template <class T, size_t N> std::ostream& operator <<(std::ostream& os, const std::array<T,N>& p) {os << "\033[1;32m" << "array[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-    template <class T> std::ostream& operator <<(std::ostream& os, const std::vector<T>& p) {os << "\033[1;32m" << "vector[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-    template <class T> std::ostream& operator <<(std::ostream& os, const std::set<T>& p) {os << "\033[1;32m" << "set[ "; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-    template <class S, class T> std::ostream& operator <<(std::ostream& os, const std::map<S, T>& p) {os << "\033[1;32m" << "map[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-    template <class S, class T> std::ostream& operator <<(std::ostream& os, const std::unordered_map<S, T>& p) {os << "\033[1;32m" << "unordered_map[ " << "\033[0m"; for (const auto& it : p) os << it << "\033[1;31m" << ", " << "\033[0m"; return os << "\033[1;32m" << "]" << "\033[0m";}
-    template <class T> void dbgIter(int32_t lineNo, const char *sdbg, T a, T b) {std::cerr<<"\033[1;"<<std::to_string(35+lineNo%2)<<"m"<<lineNo<<":\033[1;31m"<<"Debug: "<<"\033[0m"; std::cerr<<std::setw(15)<<sdbg; std::cerr<<"\033[1;31m"<<" = "<<"\033[0m"; std::cerr << "["; for (T i = a; i != b; ++i) {if (i != a) std::cerr << ", "; std::cerr << *i;} std::cerr << "]\n"; std::cout.flush(); std::cerr.flush();}
-    #define db1(a)                          if(#a[0]!='0'){dbg(__LINE__, #a, a);}
+#ifdef USE_COLORS_IN_OUTPUT
+#define mylog_color(x) x
+#else
+#define mylog_color(x) ""
+#endif
+
+#define printFunction(outStream, functionName, argDelimiter, lineDelimiter) template<typename Arg, typename... Args> inline void functionName(Arg&& arg, Args&&... args) { outStream << arg; (void)(int[]){0, (void(outStream << std::boolalpha << argDelimiter << args),0)...}; outStream << lineDelimiter; }
+#if (defined MY_LOGGING_ON) && (!defined(MY_LOGGING_OFF))
+    namespace MyLogNamespace {
+        printFunction(std::cerr, printErr, " "<<mylog_color("\033[1;34m")<<MULTI_VAR_SEPARATOR<<mylog_color("\033[0m")<<" ", '\n');
+        template<class T, class... U> void dbg(int32_t lineNo, const char *sdbg, T h, U... a) {std::cerr<<mylog_color("\033[1;"<<std::to_string(35+lineNo%2)<<"m")<<lineNo<<":"<<mylog_color("\033[1;31m")<<"Debug: "<<mylog_color("\033[0m"); std::cerr<<std::setw(15)<<sdbg; std::cerr<<" "<<mylog_color("\033[1;31m")<<"="<<mylog_color("\033[0m")<<" "; printErr(h, a...); std::cout.flush(); std::cerr.flush();}
+        template <class S, class T> std::ostream& operator <<(std::ostream& os, const std::pair<S, T>& p) {return os << mylog_color("\033[0m") << "pair(" << p.first << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m") << p.second << ")";}
+        template <class T, size_t N> std::ostream& operator <<(std::ostream& os, const std::array<T,N>& p) {os << mylog_color("\033[1;32m") << "array[ " << mylog_color("\033[0m"); for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class T> std::ostream& operator <<(std::ostream& os, const std::vector<T>& p) {os << mylog_color("\033[1;32m") << "vector[ " << mylog_color("\033[0m"); for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class T> std::ostream& operator <<(std::ostream& os, const std::set<T>& p) {os << mylog_color("\033[1;32m") << "set[ "; for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class T> std::ostream& operator <<(std::ostream& os, const std::multiset<T>& p) {os << mylog_color("\033[1;32m") << "multiset[ "; for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class S, class T, class U> std::ostream& operator <<(std::ostream& os, const std::map<S, T, U>& p) {os << mylog_color("\033[1;32m") << "map[ " << mylog_color("\033[0m"); for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class S, class T, class U> std::ostream& operator <<(std::ostream& os, const std::unordered_map<S, T, U>& p) {os << mylog_color("\033[1;32m") << "unordered_map[ " << mylog_color("\033[0m"); for (const auto& it : p) os << it << mylog_color("\033[1;31m") << ", " << mylog_color("\033[0m"); return os << mylog_color("\033[1;32m") << "]" << mylog_color("\033[0m");}
+        template <class T> void dbgIter(int32_t lineNo, const char *sdbg, T a, T b) {std::cerr<<mylog_color("\033[1;"<<std::to_string(35+lineNo%2)<<"m")<<lineNo<<":"<<mylog_color("\033[1;31m")<<"Debug: "<<mylog_color("\033[0m"); std::cerr<<std::setw(15)<<sdbg; std::cerr<<mylog_color("\033[1;31m")<<" = "<<mylog_color("\033[0m"); std::cerr << "["; for (T i = a; i != b; ++i) {if (i != a) std::cerr << ", "; std::cerr << (*i);} std::cerr << "]\n"; std::cout.flush(); std::cerr.flush();}
+    }
+    #define db1(a)                          if(#a[0]!='0'){MyLogNamespace::dbg(__LINE__, #a, a);}
     #define db11(a,b,c,d,e,f,g,h,i,j,k,...) {db1(a);db1(b);db1(c);db1(d);db1(e);db1(f);db1(g);db1(h);db1(i);db1(j);db1(k);}
     #define db(...)                         db11(__VA_ARGS__,0,0,0,0,0,0,0,0,0,0,0)
-    #define dbl(...)                        dbg(__LINE__, #__VA_ARGS__, __VA_ARGS__)
-    #define dbiter(...) dbgIter(__LINE__, #__VA_ARGS__, __VA_ARGS__);
+    #define dbl(...)                        MyLogNamespace::dbg(__LINE__, #__VA_ARGS__, __VA_ARGS__)
+    #define dbiter(...)                     MyLogNamespace::dbgIter(__LINE__, #__VA_ARGS__, __VA_ARGS__);
 #else
     // template<class T, class... U> void dbg(int32_t lineNo, const char *sdbg, T h, U... a) {}
     // template <class T> void dbgIter(int32_t lineNo, const char *sdbg, T a, T b) {}
@@ -80,7 +98,7 @@ namespace fm {
     #define ITditer1(arr)               rbegin(arr),rend(arr)
     #define uiter(...)                  GET_MACRO(__VA_ARGS__, 0, ITuiter3, ITuiter2, ITuiter1)(__VA_ARGS__)
     #define diter(...)                  GET_MACRO(__VA_ARGS__, 0, ITditer3, ITditer2, ITditer1)(__VA_ARGS__)
-    #define FORiter(_it, _f, _l)    for(auto _it=(_f), _it##end=(_l); _it != _it##end; advance(_it,1))
+    #define FORiter(_it, _f, _l)    for(auto _it=(_f), _it##end=(_l); _it != _it##end; _it = _it+1)  // advance(_it,1)
     #define foriter(_it, ...)       FORiter(_it, __VA_ARGS__)
 
     /* Do NOT use this for interactive programs */
@@ -100,6 +118,7 @@ namespace fm {
         initfloat();
     }
 
+#ifndef _WIN32
     /* WARNING: this only works when input is from getint(...) ONLY, NOT when intermixed with `cin` */
     template<typename T>
     inline T getint() {
@@ -121,6 +140,7 @@ namespace fm {
     // Advantage, on input of 10'000'000:
     // cin         -> 2.01seconds and 83744k RAM
     // getint(...) -> 0.72seconds and  6408k RAM
+#endif
 
     template<typename T, typename U> std::vector<T> MatrixVector(int n, U v){ return std::vector<T>(n, v);}
     template<typename T, class... Args> auto MatrixVector(int n, Args... args){auto val = MatrixVector<T>(args...); return std::vector<decltype(val)>(n, move(val));}
@@ -152,10 +172,13 @@ enum Code {
     BG_DEFAULT  = 49
 };
 
+#ifdef USE_COLORS_IN_OUTPUT
 #define color(enum_code) "\033[" << enum_code << "m"
+#else
+#define color(enum_code) ""
+#endif
 
-
-#ifdef MY_LOGGING_ON
+#if (defined MY_LOGGING_ON) && (!defined(MY_LOGGING_OFF))
 
 // REFER: https://stackoverflow.com/questions/7432100/how-to-get-integer-thread-id-in-c11
 // (std::this_thread::get_id())
@@ -186,7 +209,7 @@ enum Code {
     template <typename T>
     void log_warning(const T& msg, bool prependNewLine = false, bool appendExtraNewLine = false) {}
 
-#endif
+#endif  // end MY_LOGGING_ON
 
 /* Green message */
 template <typename T>
