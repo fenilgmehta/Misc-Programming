@@ -3,6 +3,9 @@ This repository contains various types of programs. Almost all program can compi
 
 <!-- 
 
+Super Script : ⁰¹²³⁴⁵⁶⁷⁸⁹
+Sub Script   : ₀₁₂₃₄₅₆₇₈₉
+
 •
 
 🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉
@@ -16,9 +19,13 @@ This repository contains various types of programs. Almost all program can compi
     𝟬/𝟭-𝗶𝗻𝗱𝗲𝘅𝗲𝗱
     𝗪𝗔𝗥𝗡𝗜𝗡𝗚
     𝘁𝗼𝗼
+    𝗧𝗶𝗺𝗲 𝗖𝗼𝗺𝗽𝗹𝗲𝘅𝗶𝘁𝘆
 
 𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯
 𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕
+
+For spaces, refer: https://jkorpela.fi/chars/spaces.html
+' ' width = 1 en (= 1/2 em)
 
 -->
 
@@ -165,6 +172,7 @@ This repository contains various types of programs. Almost all program can compi
 13. Notes
     - Generally recursive implementations are better than iterative implementation - [testing and comparison](./src_others/010_notes_Comparison-of-Recursive-and-Iterative-Implementations.md)
         - However, sometime iterative can also be good. It depends on the use case and the constraints under which the problem has to be solved. Example: if we have to traverse a binary tree in `O(n)` time and `O(1)` space complexity, then iterative implementation (i.e. Morris Traversal) is better than other recursion (because recursion has `O(log(n))` space complexity) and stack based iterative implementations.
+    - Lambda Function (C++11 and higher): [https://stackoverflow.com/questions/7627098/what-is-a-lambda-expression-in-c11](https://stackoverflow.com/questions/7627098/what-is-a-lambda-expression-in-c11)
 
 
 
