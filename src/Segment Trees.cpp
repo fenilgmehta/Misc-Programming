@@ -52,7 +52,7 @@ struct DynamicTree {
     inline T &get_val(Node *ptr) { return (ptr == nullptr) ? default_value : (ptr->data); }
 
     template<typename RandomIt>
-    Node *build(RandomIt first, Node *ptr, size_t l, size_t r) {
+    Node *build(const RandomIt &first, Node *ptr, size_t l, size_t r) {
         if (ptr == nullptr) ptr = new Node(default_value);
         if (l == r) {
             ptr->data = *next(first, l);
@@ -66,6 +66,8 @@ struct DynamicTree {
         return ptr;
     }
 
+    // NOTE: It is assumed that iterator "first" points to a data structure
+    //       which has "n" elements
     template<typename RandomIt>
     void build(RandomIt first) { root = build(first, root, 0, n - 1); }
 
@@ -73,7 +75,8 @@ struct DynamicTree {
         if (idx < l || r < idx) return ptr;
         if (ptr == nullptr) ptr = new Node(default_value);
         if (l == r) {
-            // l==idx && r==idx, will always be true if l==r because of the first condition, i.e. (idx < l || r < idx)
+            // l==idx && r==idx, will always be true if l==r because of the first condition,
+            // i.e. (idx < l || r < idx)
             ptr->data = new_val;
             return ptr;
         }
@@ -130,6 +133,7 @@ struct DynamicTree {
                 ptr = ptr->right;
             }
         }
+        // TODO: I think that below "if" condition will always be true
         if (idx == l) return {true, ptr->data};
 
         cout << "ERROR in at(...): idx=" << idx << ", l=" << l << endl;
@@ -223,6 +227,8 @@ A similar data structure is the interval tree.
 
 • 𝗡𝗢𝗧𝗘: It is 𝗺𝗮𝗻𝗱𝗮𝘁𝗼𝗿𝘆 to make CombinerFuntion to be "const member functions"
 
+• NOTE: Below is the iterative version of segment tree implementation
+
 */
 template<typename T, size_t N, typename CombinerFunction>
 struct SegmentTree {
@@ -235,6 +241,7 @@ struct SegmentTree {
 
     inline size_t size() const { return n; }
 
+    // NOTE: it is assumed that the condition "new_size <= n" is true, otherwise undefined behaviour
     inline void resize(const size_t new_size) { n = new_size; }
 
     inline void reset() { fill(arr, arr + 2 * n, default_value); }
@@ -242,7 +249,7 @@ struct SegmentTree {
     /* Returns base array value at index `idx` */
     inline T &operator[](const size_t idx) { return arr[n + idx]; }
 
-    // NOTE: we use `int` in the for loop to handle cases where n <= 0
+    // NOTE: we use `int` in the for loop to handle cases where i < 0
     void build() {
         for (int i = n - 1; i > 0; --i) arr[i] = combine(arr[i << 1], arr[(i << 1) ^ 1]);
     }
@@ -437,7 +444,7 @@ struct SegmentTreeSimpleLazy {
     static inline size_t MID(size_t l, size_t r) { return (l + r) >> 1u; }
 
 private:
-    // NOTE: we use `int` in the for loop to handle cases where n <= 0
+    // NOTE: we use `int` in the for loop to handle cases where n < 0
     template<typename RandomIt>
     void m_build(const RandomIt first, const size_t node_idx, const size_t u, const size_t v) {
         if (u > v) return;
@@ -470,8 +477,7 @@ private:
         lazy[idx] = {0, 1, false};
     }
 
-    T
-    m_range_add_mul(const size_t idxl, const size_t idxr, const T &diff, const T &mul_factor, size_t idx, size_t ll, size_t rr) {
+    T m_range_add_mul(const size_t idxl, const size_t idxr, const T &diff, const T &mul_factor, size_t idx, size_t ll, size_t rr) {
         // if outsize limit, then return
         if (idxr < ll || rr < idxl)
             return lazy[idx].isvalid ? (tree[idx] * lazy[idx].mul + (rr - ll + 1) * lazy[idx].add) : tree[idx];  /* ll > rr */
@@ -573,15 +579,15 @@ int main() {
     // const int ST_SIZE = 9;
     // SegmentTree<int, ST_SIZE, numeric_limits<int>::max(), MyCombinerMin> st;  // range max query
     // SegmentTree<int, ST_SIZE, numeric_limits<int>::min(), MyCombinerMax> st;  // range min query
-    // SegmentTree<int, ST_SIZE, 0, plus<int>> st;        // range binary sum query
-    // SegmentTree<int, ST_SIZE, 1, multiplies<int>> st;  // range binary product query
-    // SegmentTree<int, ST_SIZE, 0, bit_xor<int>> st;     // range binary xor query
-    // SegmentTree<int, ST_SIZE, 0, bit_or<int>> st;      // range binary or query
-    // SegmentTree<int, ST_SIZE, numeric_limits<int>::max(), bit_and<int>> st;   // range binary AND query
+    // SegmentTree<int, ST_SIZE, 0, plus<int>> st;        // range Sum query
+    // SegmentTree<int, ST_SIZE, 1, multiplies<int>> st;  // range Product query
+    // SegmentTree<int, ST_SIZE, 0, bit_xor<int>> st;     // range Binary XOR query
+    // SegmentTree<int, ST_SIZE, 0, bit_or<int>> st;      // range Binary OR query
+    // SegmentTree<int, ST_SIZE, numeric_limits<int>::max(), bit_and<int>> st;   // range Binary AND query
 
     SegmentTree<int, 9, MyCombinerMin> st(999'999);
     tie(st[0], st[1], st[2], st[3], st[4], st[5], st[6], st[7], st[8]) = make_tuple(1,3,2,4,5,1,1,5,3);
-                                                                        // index -> 0 1 2 3 4 5 6 7 8
+    //                                                                     index -> 0 1 2 3 4 5 6 7 8
 
     cout << endl;
     st.build();
