@@ -13,141 +13,91 @@ using namespace std;
 // REFER: https://cp-algorithms.com/data_structures/disjoint_set_union.html
 // REFER: https://www.hackerearth.com/practice/notes/disjoint-set-union-union-find/
 // REFER: https://www.hackerearth.com/practice/data-structures/disjoint-data-strutures/basics-of-disjoint-data-structures/tutorial/
+// REFER: https://medium.com/@RamkrishnaKulka/disjoint-set-union-union-find-the-same-blood-type-e67c51b1d2
 // Applications:
 //     1. determine the connected components in a graph
 //     2. determine the cycles in the graph
 //     3. improve speed of Kruskal's algorithm
 
-struct DisjoinSetUnion{
-    vector<int> p, s; // p -> parent, s -> subset size
+// REFER - 4th question (Locked Doors)
+// https://codingcompetitions.withgoogle.com/kickstart/submissions/000000000019ff08/YmVldC5haXp1
+struct DisjointSetUnion {
+    int num{};  // stores number of different sets
+    vector<int> rr, pp;  // "rr" stores rank of a set (i.e. its size), "pp" stores the parent
+    DisjointSetUnion() = default;
 
-
-    DisjoinSetUnion(const int t_size){
-        p.resize(t_size), s.resize(t_size);
-        iota(p.begin(), p.end(), 0);
-        fill(s.begin(), s.end(), 1);
+    explicit DisjointSetUnion(int n) : num(n), rr(n, 1), pp(n) {
+        iota(pp.begin(), pp.end(), 0);
     }
 
-
-    /* NOTE: this recursive approach makes all the child nodes directly point to the root of their subset
+    /*
+     * NOTE: This recursive approach makes all the child nodes directly point to the root
+     *       of their subset. The first condition used is "p[v] == p[p[v]]" to avoid useless
+     *       recursive call when find_set(...) is called for a node directly connected to
+     *       the root of the subset.
      * Time Complexity = O(n), Θ(1), Ω(1) ---> provided path compression is performed
      * */
-    int find_set(const int v){
-        return (p[v]==p[p[v]]) ? (p[v]) : (p[v] = find_set(p[v]));  // v==p[v]
+    int find_set(int x) {
+        return (pp[x] == pp[pp[x]]) ? pp[x] : (pp[x] = find_set(pp[x]));
     }
-    /* Time Complexity = O(log n), Θ(log n), Ω(1) ---> provided path compression is performed */
-    // int find_set(int v){
-    //     // chase parent of current node until it reaches the root
-    //     while(v != p[v]){
-    //         // this line causes path compression, i.e. it sets the parent of current node as its grandparent.
-    //         // remove the line to stop path compression
-    //         p[v] = p[p[v]];
-    //         v = p[v];
-    //     }
-    //     return v;
-    // }
-
+    /*
+    // Time Complexity = O(log n), Θ(log n), Ω(1) ---> provided path compression is performed
+    int find_set(int v){
+        // chase parent of current node until it reaches the root
+        while(v != p[v]){
+            // this line causes path compression, i.e. it sets the parent of current node as its grandparent.
+            // remove the line to stop path compression
+            p[v] = p[p[v]];
+            v = p[v];
+        }
+        return v;
+    }
+    */
 
     /*
      * Weighted union
-     *     Description: Make the subsets containing `t_a` and `t_b` part of same set
+     *     Description: Make the subsets containing `x` and `y` part of same set
      *     Name is `union_sets` as `union` is a keyword
      *     Time Complexity = O(α(n)), where α(n) is the inverse Ackermann function
-     *     Return: `true` if the subsets containing `t_a` and `t_b` are successfully unioned,
-     *             `false` if the subsets `t_a` and `t_b` already belong to the same subset.
+     *     Return: `true` if the subsets containing `a` and `b` are successfully unioned,
+     *             `false` if the subsets `a` and `b` already belong to the same subset.
      * */
-    bool union_sets(int a, int b){
-        a = find_set(a);
-        b = find_set(b);
-        if(a == b) return false;  // This will avoid increase in subset size if elements are is the same subset
-        if(s[a] >= s[b]){
-            p[b] = a;
-            s[a] += s[b];
-        } else {
-            p[a] = b;
-            s[b] += s[a];
-        }
+    bool union_sets(int x, int y) {
+        x = find_set(x);
+        y = find_set(y);
+        if (x == y) return false;  // This will avoid increase in subset size if elements are is the same subset
+        if (rr[x] < rr[y]) swap(x, y);
+        rr[x] += rr[y];
+        pp[y] = x;
+        num--;
         return true;
     }
 
-
-    /* Find whether t_a, t_b are connected/in same subset or not
+    /*
+     * Find whether x, y are connected/in same subset or not
      *     Time Complexity = O(α(n)), where α(n) is the inverse Ackermann function
-     *     Return: `true` if `t_a` and `t_b` are connected
+     *     Return: `true` if `x` and `y` are connected
      * */
-    bool in_same_set(const int t_v1, const int t_v2){
-        return find_set(t_v1)==find_set(t_v2);
+    bool in_same_set(int x, int y) {
+        return find_set(x) == find_set(y);
     }
 
-
-    void debug(){
-        cout << "p = [ "; for(auto &i: p) cout << i << ", "; cout << "]" << endl;
-        cout << "s = [ "; for(auto &i: s) cout << i << ", "; cout << "]" << endl;
-    }
-};
-
-//##########################################################
-
-// REFER - 4th question (Locked Doors)
-// https://codingcompetitions.withgoogle.com/kickstart/submissions/000000000019ff08/YmVldC5haXp1
-struct UnionFind{
-    int num;
-    vector<int> rs, parent;
-    UnionFind(){}
-    UnionFind(int n):num(n),rs(n,1),parent(n,0){iota(parent.begin(),parent.end(),0);}
-
-    // find
-    int find_set(int x){
-        return (x==parent[x]? x : parent[x]=find_set(parent[x]));
-    }
-
-    // same
-    bool in_same_set(int x,int y){
-        return find_set(x)==find_set(y);
-    }
-
-    // unite
-    void union_sets(int x,int y){
-        x=find_set(x); y=find_set(y);
-        if(x==y) return;
-        if(rs[x] < rs[y]) swap(x,y);
-        rs[x] += rs[y];
-        parent[y] = x;
-        num--;
-    }
-
-    // returns size of set x
-    inline int size(int x) { return rs[find_set(x)]; }
+    // returns size of set of "x"
+    inline int size(int x) { return rr[find_set(x)]; }
 
     // returns count of distinct sets
     inline int count() const { return num; }
-};
 
-//##########################################################
-
-struct DisjoinSetUnion_Small{
-    vector<int> parent;
-    DisjoinSetUnion_Small(int vertices){
-        parent.resize(vertices);
-        iota(begin(parent), end(parent), 0);
+    void debug() {
+        cout << "parent   = [ "; for (auto &i: pp) cout << i << ", "; cout << "]" << endl;
+        cout << "set rank = [ "; for (auto &i: rr) cout << i << ", "; cout << "]" << endl;
     }
-
-    int find_set(int v) { return ((parent[v]==parent[parent[v]]) ? (parent[v]) : (parent[v] = find_set(parent[v]))); }
-
-    bool union_sets(int v1, int v2) {
-        int a=find_set(v1), b=find_set(v2);
-        if(a==b) return false;
-        parent[a] = b;
-        return true;
-    }
-
-    bool is_same_set(const int v1, const int v2) { return find_set(v1)==find_set(v2);}
 };
 
 //####################################################################################################################
 
-int main(){
-    DisjoinSetUnion dsu(10);
+int main() {
+    DisjointSetUnion dsu(10);
 
     dsu.union_sets(8, 4);
     dsu.debug(); cout << endl;
@@ -157,7 +107,7 @@ int main(){
 
     cout << "----------\n\n";
 
-    DisjoinSetUnion dsu2(13);
+    DisjointSetUnion dsu2(13);
 
     dsu2.union_sets(2, 10);
     dsu2.debug(); cout << endl;
@@ -177,9 +127,9 @@ int main(){
     dsu2.union_sets(2, 12);
     dsu2.debug(); cout << endl;
 
-    for(const int &i: {2,3,5,7,9,10,12}){
-        for(const int &j: {2,3,5,7,9,10,12}){
-            cout << boolalpha << "dsu2.is_same_set("<<i<<", "<<j<<") = " << dsu2.in_same_set(i,j) << endl;
+    for (const int &i: {2, 3, 5, 7, 9, 10, 12}) {
+        for (const int &j: {2, 3, 5, 7, 9, 10, 12}) {
+            cout << boolalpha << "dsu2.in_same_set(" << i << ", " << j << ") = " << dsu2.in_same_set(i, j) << endl;
         }
     }
     cout << endl;
