@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <queue>
+#include <map>
 #include <unordered_map>
 using namespace std;
 
@@ -24,7 +25,119 @@ using namespace std;
 
 //####################################################################################################################
 
-/* 
+// NOTE: This can be made more efficient by using a custom ternary tree (refer "struct TrieEasyFast")
+//       However, during tests, we do not have time to implement custom ternary tree
+struct TrieEasy {
+    map<char,TrieEasy> m;
+    int count;
+
+    TrieEasy(): m(), count{0} {}
+
+    void add(const string &s) {
+        TrieEasy *t = this;
+        for (const char& ch: s) {
+            t = &(t->m[ch]);
+        }
+        t->count += 1;
+    }
+
+    int find(const string &s) {
+        TrieEasy *t = this;
+        for (const char& ch: s) {
+            auto it = t->m.lower_bound(ch);
+            if (it == t->m.end()) {
+                return 0;
+            }
+            t = &(it->second);  // it -> pair(char, TrieEasy)
+        }
+        return t->count;
+    }
+};
+
+// ---
+
+template<typename Key, typename Value>
+struct MyNode {
+    MyNode *left, *right;
+    Key k; Value v;
+    MyNode(const Key& kk): left{nullptr}, right{nullptr}, k{kk}, v() {}
+    MyNode(const Key& kk, const Value& vv): left{nullptr}, right{nullptr}, k{kk}, v{vv} {}
+};
+
+template<typename Key, typename Value>
+struct MyMap {
+    MyNode<Key,Value> *root;
+    MyMap(): root{nullptr} {}
+    ~MyMap() {
+        // NOTE: We do not use recursion because, deletion of child nodes
+        //       will automatically call their destructors
+        if (root == nullptr) return;
+        if (root->left != nullptr) delete root->left;
+        if (root->right != nullptr) delete root->right;
+    }
+    Value& operator[](const Key &k) {
+        if (root == nullptr) {
+            root = new MyNode<Key,Value>(k);
+            return root->v;
+        }
+        MyNode<Key,Value> *ptr = root;
+        while (ptr->k != k) {
+            if (k < ptr->k) {
+                if (ptr->left == nullptr) ptr->left = new MyNode<Key,Value>(k);
+                ptr = ptr->left;
+            } else {
+                if (ptr->right == nullptr) ptr->right = new MyNode<Key,Value>(k);
+                ptr = ptr->right;
+            }
+        }
+        return ptr->v;
+    }
+    MyNode<Key,Value>* find(const Key &k) {
+        if (root == nullptr) return nullptr;
+        MyNode<Key,Value> *ptr = root;
+        while (ptr != nullptr and ptr->k != k) {
+            if (k < ptr->k) {
+                ptr = ptr->left;
+            } else {
+                ptr = ptr->right;
+            }
+        }
+        return ptr;
+    }
+    MyNode<Key,Value>* end() { return nullptr; }
+};
+
+// NOTE: This is about 1.5 times faster than "struct TrieEasy"
+struct TrieEasyFast {
+    MyMap<char,TrieEasyFast> m;
+    int count;
+
+    TrieEasyFast(): m(), count{0} {}
+
+    void add(const string &s) {
+        TrieEasyFast *t = this;
+        for (const char& ch: s) {
+            t = &(t->m[ch]);
+        }
+        t->count += 1;
+    }
+
+    int find(const string &s) {
+        TrieEasyFast *t = this;
+        for (const char& ch: s) {
+            auto it = t->m.find(ch);
+            if (it == t->m.end()) {
+                return 0;
+            }
+            t = &(it->v);  // it -> pair(char, TrieEasyFast)
+        }
+        return t->count;
+    }
+};
+
+// ---
+
+/*
 Tries:
     https://www.geeksforgeeks.org/trie-insert-and-search/
     https://www.geeksforgeeks.org/advantages-trie-data-structure/
@@ -162,7 +275,7 @@ struct Trie{
         if(r->is_end_of_word) cout << "    " << s << endl;
         print_strings(r->down, s);
         s.pop_back();
-        
+
         print_strings(r->right, s);
     }
 
@@ -173,10 +286,12 @@ struct Trie{
     }
 };
 
-
+// ---
 
 // NOTE: NOT tested
 struct node{
+    // The "int" is used to store count of a string. "bool" can
+    // be used for space efficieny depending on the reqirements.
     unordered_map<char,pair<node*,int>> children;
 };
 
@@ -186,32 +301,35 @@ struct trie{
     trie() { parent = new node(); }
 
     void add(const string &a){
-        node *current = parent;
+        node *curr = parent;
         for(auto &i: a){
-            if(current->children.find(i) == current->children.end()){
-                current->children[i].first = new node();
-                current->children[i].second = 0;
+            if(curr->children.find(i) == curr->children.end()){
+                curr->children[i].first = new node();
+                // NOTE: NO need to perform the below operation as default
+                //       value for pointer=nullptr and int=0
+                // curr->children[i].second = 0;
             }
-            current = current->children[i].first;
-            current->children[i].second++;
+            curr = curr->children[i].first;
+            curr->children[i].second += 1;
         }
     }
 
-    bool exists(const string &a)const{
-        node *current = parent;
+    int exists(const string &a)const{
+        node *curr = parent;
+        int res = 0;
         for(auto &i: a){
-            if(current->children.find(i) == current->children.end()){
-                return false;
+            if(curr->children.find(i) == curr->children.end()){
+                return 0;
             }
-            current = current->children[i].first;
+            tie(curr, res) = curr->children[i];
         }
-        return true;
+        return res;
     }
 };
 
 //####################################################################################################################
 
-/* 
+/*
 
 https://www.youtube.com/watch?v=NinWEPPrkDQ&t=483s      (BEST intorduction to Strings: suffix tree, suffix array, linear-time construction for large alphabets, suffix tray, document retrieval)
 https://discuss.codechef.com/t/suffix-trees/2045        (Is there a tutorial for implementation and applications of suffix tree data-structure ?)
@@ -221,7 +339,7 @@ https://discuss.codechef.com/t/help-with-ukkonens-algorithm/47635       (Ukkenâ€
 Suffix Trie:
     https://www.youtube.com/watch?v=qh2leThTv0Y         (Basic Idea - logical implementation)
     https://www.codechef.com/problems/EST               (Practice Question)
-    https://discuss.codechef.com/t/est-editorial/394    (Editorial of the above Question) 
+    https://discuss.codechef.com/t/est-editorial/394    (Editorial of the above Question)
 
 Suffix Tree:
     https://www.geeksforgeeks.org/pattern-searching-using-suffix-tree/  (BEST)
@@ -249,7 +367,7 @@ Others:
 
 //####################################################################################################################
 
-/* 
+/*
 Manacher's Algorithm
     https://www.youtube.com/watch?v=nbTSfrEfo6M     (BEST)
     https://medium.com/hackernoon/manachers-algorithm-explained-longest-palindromic-substring-22cb27a5e96f
@@ -333,7 +451,7 @@ int longest_match(const string &a, const string &b){
     return dp[a.size()][b.size()];
 }
 
-/* 
+/*
 The edit distance between two strings is the minimum number of operations required to transform one string into the other.
 The allowed operations are:
     â€¢ Add one character to the string.
@@ -348,9 +466,9 @@ int min_edit_distance(string &a, string &b){
 
     for(int i = 1, iend = a.size() ; i <= iend; ++i){  // rows
         for(int j = 1, jend = b.size() ; j <= jend; ++i){  // columns
-            if(a[i-1]==b[j-1]) 
+            if(a[i-1]==b[j-1])
                 dp[i][j] = dp[i-1][j-1];
-            else 
+            else
                 dp[i][j] = 1 + min({
                                 dp[i-1][j-1], // replace the last character of one string to other
                                 dp[i-1][j],   // insert one character at the end of first string
