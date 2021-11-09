@@ -69,6 +69,7 @@ struct Tree1{
 
 /* Countes the number of leaf nodes under the vertex `v1` 
  * WARNING: it is assumed that the user will select `v1` such that 0 <= v1 < vertex_count
+ * NOTE: we mark the vertex as visited after popping it from the stack
  */
 int dfs(const Tree1 &tree, const int &v1, const int &parent=-1){
     bool is_leaf = true;
@@ -83,6 +84,15 @@ int dfs(const Tree1 &tree, const int &v1, const int &parent=-1){
     if(is_leaf) return 1;
     return sum;
 }
+
+/*
+- BFS
+  - REFER: https://leetcode.com/problems/binary-tree-level-order-traversal/
+- Binary tree from Preorder and Inorder Traversal
+  - REFER: https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+- Binary Tree from Inorder and Postorder Traversal
+  - REFER: https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/
+*/
 
 //####################################################################################################################
 
