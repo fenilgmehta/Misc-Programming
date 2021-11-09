@@ -8,12 +8,49 @@ using namespace std;
 
 //####################################################################################################################
 
+// Small Version of Binary Index Tree
+template<typename T>
+struct BinaryIndexTree_Small {
+    using i32=int32_t;
+    i32 N;
+    vector<T> arr;
+    BinaryIndexTree_Small(const i32 n): N{n}, arr(n+1,0) {}
+    i32 lastbit(i32 n) const {
+        return n & (-n);  // Rightmost set bit
+    }
+    void build() {
+        // Before calling this, fill arr[1:N] with proper values
+        for (i32 child = 1; child <= N; ++child) {
+            i32 parent = child + lastbit(child);
+            if (parent <= N)
+                arr[parent] += arr[child];
+        }
+    }
+    void update(i32 idx, T diff) {
+        while (idx <= N) {
+            arr[idx] += diff;
+            idx += lastbit(idx);  // go to parent
+        }
+    }
+    T query(i32 idx) {
+        T result = 0;
+        while (idx) {
+            result += arr[idx];
+            idx ^= lastbit(idx);  // drop last set bit
+        }
+        return result;
+    }
+};
+
+// ---
+
 /* 
 
 *** Binary Index Tree / Fenwick Tree ***
 
 REFER: https://www.topcoder.com/community/competitive-programming/tutorials/binary-indexed-trees/
 REFER: https://www.hackerearth.com/practice/data-structures/advanced-data-structures/fenwick-binary-indexed-trees/tutorial/
+REFER: https://leetcode.com/discuss/general-discussion/1093346/introduction-to-fenwick-treebinary-indexed-treebit
 
 NOTE: if size = 9, then VALID indexes for operations are in the range [1,9]
 NOTE: all index values in method parameters are assumed to be 𝟭-𝗶𝗻𝗱𝗲𝘅𝗲𝗱
@@ -46,6 +83,12 @@ struct BinaryIndexTree{
         for(size_type idx = 1; first != last; ++idx, ++first){
             update(idx, *first);
         }
+        // TODO: verify this
+        // for(size_type child = 1; child <= n; ++child) {
+        //     size_type pp = parent(child);
+        //     if (pp <= n)
+        //         bit[pp] = combine(bit[pp], bit[child]);
+        // }
     }
 
     inline size_type size() const { return n; }
@@ -73,12 +116,13 @@ struct BinaryIndexTree{
     T operator[](size_type idx) const {
         if(idx <= 0) return T();
         T res = bit[idx];
-        const size_type left_sibling_idx = idx - LSB(idx);
+        const size_type left_sibling_idx = left(idx);
         for(--idx; idx != left_sibling_idx; idx = left(idx))
             res = split(res, bit[idx]);
         return res;  // res = split(bit[idx], bit[children of idx])
     }
 
+    // • Also called as Rightmost Set Bit (RSB)
     // • -idx is 2's complement where the first bit storing 1 from the
     //   RHS remains the same and everything to its LHS get toggled
     //   i.e. `10101 𝟏𝟎𝟎𝟎`  ---> `01010 𝟏𝟎𝟎𝟎`
@@ -223,7 +267,7 @@ int main(){
 
     vector<int> freq = {2, 1, 1, 3, 2, 3, 4, 5, 6, 7, 8, 9};  // size = 12
     BinaryIndexTree<int> bit(freq.begin(), freq.end());
-
+    cout << endl << "size = " << bit.size() << endl;
     cout << endl << "Binary Index Tree / Fenwick Tree (1-indexed)" << endl;
     cout << "\nPrefix sum from freq[1,1] = " << setw(2) << bit.query(1);  // 2 -> 2
     cout << "\nPrefix sum from freq[1,2] = " << setw(2) << bit.query(2);  // 3 -> 2, 1
