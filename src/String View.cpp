@@ -29,7 +29,7 @@ struct MyStringView {
 	// --- Basic Methods ---
 	size_t size() const { return len; }
 	const char* data() const { return ptr; }  // "ptr" will NOT always be null terminated
-    const char& operator[](size_t idx) const { return ptr[idx]; }
+	const char& operator[](size_t idx) const { return ptr[idx]; }
 	bool operator==(const MyStringView &aMSV) const {
 		if (len != aMSV.len) return false;
 		if (ptr == aMSV.ptr) return true;
