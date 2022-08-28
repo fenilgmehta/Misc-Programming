@@ -19,6 +19,7 @@ void QuickSort(RandomAccessIterator arrPtr, int32_t len) {
     if (not(arrPtr[0] <= arrPtr[len-1])) iter_swap(arrPtr+0, arrPtr+len-1);
     if (arrPtr[0] < arrPtr[mid]) iter_swap(arrPtr+0, arrPtr+mid);  // median will be at index 0
 
+    // ❗NOTE: It is mandatory to have the median at index 0
     auto pivot = *arrPtr;  // median of arr[0,..., mid,..., len-1]
 
     // Hoare's Partition Scheme
@@ -32,9 +33,13 @@ void QuickSort(RandomAccessIterator arrPtr, int32_t len) {
         if (i >= j) break;
         swap(arrPtr[i], arrPtr[j]);
     }
+
     // [0...j...i...len)
     QuickSort(arrPtr, j+1);  // [0, j] ---> len j+1
     QuickSort(arrPtr + (j+1), len - (j+1));  // [j+1, len-1]
+    // PROBABLY, instead of using the recursion on the range [0,j] and [j+1,len) -> we can
+    // call the recursive sort on the range [0,j] and [i,len). I had tried so in
+    // https://leetcode.com/problems/sort-the-matrix-diagonally
     return;
 
     /*
